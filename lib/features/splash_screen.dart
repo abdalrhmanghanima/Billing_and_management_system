@@ -2,18 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:billing_and_sales_management/core/app_assets.dart';
-import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:billing_and_sales_management/features/auth/providers/auth_state_provider.dart';
 import 'package:billing_and_sales_management/features/auth/screens/login_screen.dart';
+import 'package:billing_and_sales_management/features/home/screens/home_screen.dart';
+import 'package:billing_and_sales_management/responsive/responsive.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _pulse = AnimationController(
     vsync: this,
@@ -28,14 +31,23 @@ class _SplashScreenState extends State<SplashScreen>
 
     _pulse.repeat(reverse: true);
 
-    _navigationTimer = Timer(const Duration(milliseconds: 2400), _openLogin);
+    _navigationTimer = Timer(
+      const Duration(milliseconds: 2400),
+      _openInitialScreen,
+    );
   }
 
-  void _openLogin() {
+  Future<void> _openInitialScreen() async {
+    if (!mounted) return;
+
+    final user = await ref.read(authStateProvider.future);
     if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(builder: (context) => const LoginScreen()),
+      MaterialPageRoute<void>(
+        builder: (context) =>
+            user == null ? const LoginScreen() : const HomeScreen(),
+      ),
     );
   }
 

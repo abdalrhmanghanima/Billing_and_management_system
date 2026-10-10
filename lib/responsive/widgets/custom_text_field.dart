@@ -81,6 +81,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
   late bool _obscured = widget.obscureText;
 
   @override
+  void didUpdateWidget(CustomTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.obscureText != widget.obscureText) {
+      _obscured = widget.obscureText;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isMultiline = widget.maxLines > 1;
 
