@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Billing & Sales Management - Mobile UI/UX Design System</title>
+  <meta name="description" content="Production-ready Mobile UI/UX Design for Billing & Sales Management with live validation and calculation engine." />
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/screens.css" />
+</head>
+<body>
+
+  <!-- Floating Exit Screenshot Mode Button -->
+  <button id="exit-screenshot-btn" class="exit-screenshot-btn" title="Exit Figma screenshot mode">
+    ✕ Exit Figma Mode
+  </button>
+
+  <div class="app-canvas-container">
+    <!-- Top Designer & Figma Toolbar -->
+    <header class="designer-control-bar" id="designer-control-bar">
+      <div class="designer-bar-left">
+        <div class="designer-brand-pill">
+          <img src="assets/app_logo.png" alt="App Logo" />
+          <span>BILLING & SALES</span>
+        </div>
+
+        <!-- Quick Jump Screen Selector -->
+        <div class="designer-control-group">
+          <label for="designer-screen-select">Screen:</label>
+          <select id="designer-screen-select" class="designer-select">
+            <optgroup label="Brand & Authentication">
+              <option value="splash">1. Splash Screen</option>
+              <option value="onboarding">2. Onboarding</option>
+              <option value="login">3. Login</option>
+              <option value="signup">4. Sign Up</option>
+              <option value="forgotPassword">5. Forgot Password</option>
+              <option value="otp">6. Verification / OTP</option>
+            </optgroup>
+            <optgroup label="Main Application">
+              <option value="dashboard" selected>7. Home / Dashboard</option>
+              <option value="reports">8. Sales Report</option>
+              <option value="more">9. Master Catalog Hub</option>
+            </optgroup>
+            <optgroup label="Master Data & Entities">
+              <option value="companies">10. Companies List</option>
+              <option value="types">11. Types List</option>
+              <option value="units">12. Units List</option>
+              <option value="categories">13. Categories List</option>
+              <option value="items">14. Items List</option>
+              <option value="clients">15. Clients List</option>
+            </optgroup>
+            <optgroup label="Sales Invoice Flow (SRS)">
+              <option value="newInvoiceStep1">16. Invoice — Step 1: Bill Details</option>
+              <option value="newInvoiceAddItem">17. Invoice — Step 2: Add Item</option>
+              <option value="newInvoiceItemsList">18. Invoice — Step 2: Items List</option>
+              <option value="newInvoiceSummary">19. Invoice — Step 3: Summary</option>
+              <option value="invoiceDetails">20. Invoice Details (Receipt)</option>
+              <option value="requestForm">21. Request a Form (Section 4)</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <!-- Viewport Switcher -->
+        <div class="designer-segmented-controls" title="Change viewport dimensions">
+          <button class="designer-segment-btn" data-viewport="375">375</button>
+          <button class="designer-segment-btn active" data-viewport="390">390</button>
+          <button class="designer-segment-btn" data-viewport="393">393</button>
+          <button class="designer-segment-btn" data-viewport="430">430</button>
+          <button class="designer-segment-btn" data-viewport="frameless">Clean</button>
+        </div>
+
+        <!-- UI State Switcher -->
+        <div class="designer-segmented-controls" title="Toggle screen presentation states">
+          <button class="designer-segment-btn active" data-ui-state="populated">Populated</button>
+          <button class="designer-segment-btn" data-ui-state="loading">Loading</button>
+          <button class="designer-segment-btn" data-ui-state="empty">Empty</button>
+        </div>
+
+        <!-- Figma / Screenshot Mode -->
+        <button class="designer-btn" id="btn-screenshot-mode" title="Hide control bars for clean screenshots">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Figma Mode
+        </button>
+
+        <!-- Reset Mock Data -->
+        <button class="designer-btn designer-btn-secondary" id="btn-reset-data" title="Reset all data to defaults">
+          Reset Data
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Device Container -->
+    <div class="mobile-frame-wrapper">
+      <div class="mobile-device-frame vp-390" id="mobile-device-frame">
+
+        <!-- iOS Native Status Bar -->
+        <div class="mobile-status-bar dark-content" id="mobile-status-bar">
+          <span class="status-bar-time" id="status-bar-time">9:41</span>
+
+          <!-- Dynamic Island Notch -->
+          <div class="status-bar-notch">
+            <div class="notch-camera-dot"></div>
+            <div class="notch-sensor-dot"></div>
+          </div>
+
+          <div class="status-bar-icons">
+            <!-- Cellular -->
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 17h3v4H2v-4zm6-5h3v9H8v-9zm6-5h3v14h-3V7zm6-5h3v19h-3V2z"/></svg>
+            <!-- Wifi -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M1.5 9.288a15 15 0 0 1 21 0"/></svg>
+            <!-- Battery -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="12" x="2" y="6" rx="3"/><line x1="23" y1="10" x2="23" y2="14"/><rect width="10" height="6" x="5" y="9" fill="currentColor"/></svg>
+          </div>
+        </div>
+
+        <!-- Viewport Container -->
+        <div class="mobile-screen-viewport">
+
+          <!-- Native Mobile App Bar / Header -->
+          <header class="mobile-app-header hidden" id="mobile-app-header">
+            <button class="header-action-btn hidden" id="app-header-back-btn" aria-label="Go Back">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="header-title-box">
+              <h1 id="app-header-title">Title</h1>
+              <div class="header-subtitle hidden" id="app-header-subtitle">Subtitle</div>
+            </div>
+            <div style="width: 38px;"></div> <!-- balance spacer -->
+          </header>
+
+          <!-- Scrollable Screen Content Container -->
+          <main class="screen-scroll-container" id="screen-scroll-container">
+            <!-- Active Screen Injected Here -->
+          </main>
+
+          <!-- Mobile Bottom Navigation Bar -->
+          <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+            <div class="nav-tab-item active" id="nav-tab-home">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Home</span>
+            </div>
+
+            <div class="nav-tab-item" id="nav-tab-clients">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Clients</span>
+            </div>
+
+            <!-- Central Prominent Action: New Invoice -->
+            <div class="nav-tab-center" id="nav-tab-center-fab" title="Create New Sales Invoice">
+              <div class="center-fab-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              <span class="center-fab-label">Invoice</span>
+            </div>
+
+            <div class="nav-tab-item" id="nav-tab-items">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+              <span>Items</span>
+            </div>
+
+            <div class="nav-tab-item" id="nav-tab-reports">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+              <span>Reports</span>
+            </div>
+
+            <div class="nav-tab-item" id="nav-tab-more">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+              <span>More</span>
+            </div>
+          </nav>
+
+          <!-- Home Indicator (iOS) -->
+          <div class="mobile-home-indicator"></div>
+
+        </div><!-- /.mobile-screen-viewport -->
+
+        <!-- Mobile Bottom Sheet Backdrop & Drawer -->
+        <div class="bottom-sheet-backdrop" id="app-bottom-sheet-backdrop">
+          <div class="bottom-sheet-content" id="app-bottom-sheet-content">
+            <div class="bottom-sheet-drag-handle"></div>
+            <div class="bottom-sheet-header">
+              <h3 class="bottom-sheet-title" id="app-bottom-sheet-title">Form</h3>
+              <button class="header-action-btn" id="app-bottom-sheet-close-btn" aria-label="Close form">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div class="bottom-sheet-body" id="app-bottom-sheet-body">
+              <!-- Dynamic Form Content Injected Here -->
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /.mobile-device-frame -->
+    </div><!-- /.mobile-frame-wrapper -->
+
+    <!-- Toast / Snackbar Notification Container (Z-Index 99999: Above Bottom Sheets and Bottom Nav) -->
+    <div class="app-snackbar-container" id="app-snackbar-container"></div>
+  </div><!-- /.app-canvas-container -->
+
+  <!-- JavaScript Modules -->
+  <script src="js/mock-data.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/invoice.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/screens.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

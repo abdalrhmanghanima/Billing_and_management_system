@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "708826947572",
+    "project_id": "billing-sales-abdo-2026",
+    "storage_bucket": "billing-sales-abdo-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:708826947572:android:fdf05044e3524a59a323a1",
+        "android_client_info": {
+          "package_name": "com.example.billing_and_sales_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByLE51CHSEt7nkFOkTTnKENRANlEvp3tg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
