@@ -181,7 +181,7 @@ class _CustomSnackbarView extends StatelessWidget {
     final resIcon = icon ?? style.icon;
 
     return PositionedDirectional(
-      top: topInset + 8.h,
+      bottom: 30.h,
       start: AppSpacing.base.w,
       end: AppSpacing.base.w,
       child: ValueListenableBuilder<bool>(

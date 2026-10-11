@@ -285,7 +285,7 @@ class _CenterActionButton extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.primary,
-              border: Border.all(color: AppColors.white, width: 4.5.r),
+              border: Border.all(color: AppColors.white, width: 3.r),
               boxShadow: AppShadows.fab,
             ),
             child: Icon(
