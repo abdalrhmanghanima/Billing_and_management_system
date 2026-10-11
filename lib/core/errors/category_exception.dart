@@ -3,6 +3,7 @@ class CategoryExceptionCodes {
 
   static const String nameRequired = 'name-required';
   static const String nameDuplicate = 'name-duplicate';
+  static const String notFound = 'not-found';
   static const String networkRequestFailed = 'network-request-failed';
   static const String unknown = 'unknown';
 }
@@ -18,6 +19,8 @@ class CategoryException implements Exception {
         return 'Category Name is Required';
       case CategoryExceptionCodes.nameDuplicate:
         return 'Category Name has already existed before';
+      case CategoryExceptionCodes.notFound:
+        return 'This category no longer exists. It may have been deleted already.';
       case CategoryExceptionCodes.networkRequestFailed:
         return 'Network error. Please check your connection and try again.';
       default:

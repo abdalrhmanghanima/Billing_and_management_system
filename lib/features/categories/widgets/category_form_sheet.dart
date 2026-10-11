@@ -1,22 +1,36 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/domain/categories/entities/category.dart';
 import 'package:billing_and_sales_management/features/categories/providers/categories_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CategoryFormSheet extends ConsumerStatefulWidget {
-  const CategoryFormSheet({super.key});
+  const CategoryFormSheet({super.key, this.existing});
+
+  final Category? existing;
 
   @override
   ConsumerState<CategoryFormSheet> createState() => _CategoryFormSheetState();
 }
 
 class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _notesController;
 
   String? _nameError;
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.existing?.name ?? '');
+    _notesController = TextEditingController(
+      text: widget.existing?.notes ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -39,9 +53,14 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
       _isSaving = true;
     });
 
-    final result = await ref
-        .read(categoriesProvider.notifier)
-        .addCategory(name: name, notes: _notesController.text);
+    final notifier = ref.read(categoriesProvider.notifier);
+    final result = _isEditing
+        ? await notifier.updateCategory(
+            id: widget.existing!.id,
+            name: name,
+            notes: _notesController.text,
+          )
+        : await notifier.addCategory(name: name, notes: _notesController.text);
 
     if (!mounted) return;
 
@@ -49,14 +68,21 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
 
     switch (result) {
       case SaveResult.success:
-        CustomSnackbar.showSuccess(context, 'Category saved successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          _isEditing
+              ? 'Category updated successfully.'
+              : 'Category saved successfully.',
+        );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
         setState(() => _nameError = 'Category Name has already existed before');
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not save the category. Please try again.',
+          _isEditing
+              ? 'Could not update the category. Please try again.'
+              : 'Could not save the category. Please try again.',
         );
     }
   }
@@ -90,7 +116,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         ),
         SizedBox(height: AppSpacing.lg.h),
         CustomButton(
-          text: 'Save Category',
+          text: _isEditing ? 'Update Category' : 'Save Category',
           onPressed: _save,
           loading: _isSaving,
         ),

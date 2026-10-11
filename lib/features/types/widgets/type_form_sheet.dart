@@ -1,5 +1,6 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
+import 'package:billing_and_sales_management/domain/types/entities/item_type.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
@@ -7,20 +8,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TypeFormSheet extends ConsumerStatefulWidget {
-  const TypeFormSheet({super.key});
+  const TypeFormSheet({super.key, this.existing});
+
+  final ItemType? existing;
 
   @override
   ConsumerState<TypeFormSheet> createState() => _TypeFormSheetState();
 }
 
 class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _notesController;
 
   Company? _selectedCompany;
   String? _companyError;
   String? _nameError;
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.existing?.name ?? '');
+    _notesController = TextEditingController(
+      text: widget.existing?.notes ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -49,14 +63,21 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
       _isSaving = true;
     });
 
-    final result = await ref
-        .read(typesProvider.notifier)
-        .addType(
-          companyId: company.id,
-          companyName: company.name,
-          name: name,
-          notes: _notesController.text,
-        );
+    final notifier = ref.read(typesProvider.notifier);
+    final result = _isEditing
+        ? await notifier.updateType(
+            id: widget.existing!.id,
+            companyId: company.id,
+            companyName: company.name,
+            name: name,
+            notes: _notesController.text,
+          )
+        : await notifier.addType(
+            companyId: company.id,
+            companyName: company.name,
+            name: name,
+            notes: _notesController.text,
+          );
 
     if (!mounted) return;
 
@@ -64,14 +85,21 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
 
     switch (result) {
       case SaveResult.success:
-        CustomSnackbar.showSuccess(context, 'Type saved successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          _isEditing
+              ? 'Type updated successfully.'
+              : 'Type saved successfully.',
+        );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
         setState(() => _nameError = 'TYPE NAME has already existed before');
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not save the type. Please try again.',
+          _isEditing
+              ? 'Could not update the type. Please try again.'
+              : 'Could not save the type. Please try again.',
         );
     }
   }
@@ -102,6 +130,12 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
             message:
                 'Add a company first before creating types. Types must belong to a company.',
           );
+        }
+
+        if (_selectedCompany == null && _isEditing) {
+          _selectedCompany = companies
+              .where((company) => company.id == widget.existing!.companyId)
+              .firstOrNull;
         }
 
         return _buildForm(companies);
@@ -165,7 +199,11 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
           minLines: 3,
         ),
         SizedBox(height: AppSpacing.lg.h),
-        CustomButton(text: 'Save Type', onPressed: _save, loading: _isSaving),
+        CustomButton(
+          text: _isEditing ? 'Update Type' : 'Save Type',
+          onPressed: _save,
+          loading: _isSaving,
+        ),
       ],
     );
   }

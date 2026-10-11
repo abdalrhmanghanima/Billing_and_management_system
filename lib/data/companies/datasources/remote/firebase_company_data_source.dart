@@ -61,6 +61,68 @@ class FirebaseCompanyRemoteDataSource implements CompanyRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> updateCompany(CompanyModel company) async {
+    final normalizedName = Company.normalizeName(company.name);
+    if (normalizedName.isEmpty) {
+      throw const CompanyException(CompanyExceptionCodes.nameRequired);
+    }
+
+    final oldId = company.id;
+    if (oldId.isEmpty) {
+      throw const CompanyException(CompanyExceptionCodes.notFound);
+    }
+
+    final newId = _documentIdFor(normalizedName);
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final oldDocument = _companies.doc(oldId);
+        final oldSnapshot = await transaction.get(oldDocument);
+        if (!oldSnapshot.exists) {
+          throw const CompanyException(CompanyExceptionCodes.notFound);
+        }
+
+        if (newId == oldId) {
+          transaction.set(oldDocument, company.toMap());
+          return;
+        }
+
+        final newDocument = _companies.doc(newId);
+        final newSnapshot = await transaction.get(newDocument);
+        if (newSnapshot.exists) {
+          throw const CompanyException(CompanyExceptionCodes.nameDuplicate);
+        }
+
+        transaction.delete(oldDocument);
+        transaction.set(newDocument, company.toMap());
+      });
+    } on FirebaseException catch (error) {
+      throw CompanyException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
+  @override
+  Future<void> deleteCompany(String id) async {
+    if (id.isEmpty) {
+      throw const CompanyException(CompanyExceptionCodes.notFound);
+    }
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final document = _companies.doc(id);
+        final snapshot = await transaction.get(document);
+        if (!snapshot.exists) {
+          throw const CompanyException(CompanyExceptionCodes.notFound);
+        }
+
+        transaction.delete(document);
+      });
+    } on FirebaseException catch (error) {
+      throw CompanyException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
   static String _documentIdFor(String normalizedName) {
     return base64Url.encode(utf8.encode(normalizedName));
   }

@@ -60,6 +60,68 @@ class FirebaseItemRemoteDataSource implements ItemRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> updateItem(ItemModel item) async {
+    final normalizedName = Item.normalizeName(item.name);
+    if (normalizedName.isEmpty) {
+      throw const ItemException(ItemExceptionCodes.nameRequired);
+    }
+
+    final oldId = item.id;
+    if (oldId.isEmpty) {
+      throw const ItemException(ItemExceptionCodes.notFound);
+    }
+
+    final newId = _documentIdFor(normalizedName);
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final oldDocument = _items.doc(oldId);
+        final oldSnapshot = await transaction.get(oldDocument);
+        if (!oldSnapshot.exists) {
+          throw const ItemException(ItemExceptionCodes.notFound);
+        }
+
+        if (newId == oldId) {
+          transaction.set(oldDocument, item.toMap());
+          return;
+        }
+
+        final newDocument = _items.doc(newId);
+        final newSnapshot = await transaction.get(newDocument);
+        if (newSnapshot.exists) {
+          throw const ItemException(ItemExceptionCodes.nameDuplicate);
+        }
+
+        transaction.delete(oldDocument);
+        transaction.set(newDocument, item.toMap());
+      });
+    } on FirebaseException catch (error) {
+      throw ItemException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
+  @override
+  Future<void> deleteItem(String id) async {
+    if (id.isEmpty) {
+      throw const ItemException(ItemExceptionCodes.notFound);
+    }
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final document = _items.doc(id);
+        final snapshot = await transaction.get(document);
+        if (!snapshot.exists) {
+          throw const ItemException(ItemExceptionCodes.notFound);
+        }
+
+        transaction.delete(document);
+      });
+    } on FirebaseException catch (error) {
+      throw ItemException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
   static String _documentIdFor(String normalizedName) {
     return base64Url.encode(utf8.encode(normalizedName));
   }

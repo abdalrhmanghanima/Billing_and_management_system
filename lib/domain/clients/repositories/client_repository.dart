@@ -5,5 +5,9 @@ abstract interface class ClientRepository {
 
   Future<void> addClient(Client client);
 
+  Future<void> updateClient(Client client);
+
+  Future<void> deleteClient(String id);
+
   Future<int> getNextClientNumber();
 }

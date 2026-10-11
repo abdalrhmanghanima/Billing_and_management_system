@@ -1,5 +1,6 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
+import 'package:billing_and_sales_management/domain/items/entities/item.dart';
 import 'package:billing_and_sales_management/domain/types/entities/item_type.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
@@ -9,17 +10,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ItemFormSheet extends ConsumerStatefulWidget {
-  const ItemFormSheet({super.key});
+  const ItemFormSheet({super.key, this.existing});
+
+  final Item? existing;
 
   @override
   ConsumerState<ItemFormSheet> createState() => _ItemFormSheetState();
 }
 
 class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _sellingPriceController = TextEditingController();
-  final TextEditingController _buyingPriceController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _sellingPriceController;
+  late final TextEditingController _buyingPriceController;
+  late final TextEditingController _notesController;
 
   Company? _selectedCompany;
   ItemType? _selectedType;
@@ -30,6 +33,22 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
   String? _sellingPriceError;
   String? _buyingPriceError;
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    _nameController = TextEditingController(text: existing?.name ?? '');
+    _sellingPriceController = TextEditingController(
+      text: existing == null ? '' : existing.sellingPrice.toStringAsFixed(2),
+    );
+    _buyingPriceController = TextEditingController(
+      text: existing == null ? '' : existing.buyingPrice.toStringAsFixed(2),
+    );
+    _notesController = TextEditingController(text: existing?.notes ?? '');
+  }
 
   @override
   void dispose() {
@@ -108,18 +127,29 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
     final sellingPrice = double.parse(_sellingPriceController.text.trim());
     final buyingPrice = double.parse(_buyingPriceController.text.trim());
 
-    final result = await ref
-        .read(itemsProvider.notifier)
-        .addItem(
-          companyId: company.id,
-          companyName: company.name,
-          typeId: type.id,
-          typeName: type.name,
-          name: name,
-          sellingPrice: sellingPrice,
-          buyingPrice: buyingPrice,
-          notes: _notesController.text,
-        );
+    final notifier = ref.read(itemsProvider.notifier);
+    final result = _isEditing
+        ? await notifier.updateItem(
+            id: widget.existing!.id,
+            companyId: company.id,
+            companyName: company.name,
+            typeId: type.id,
+            typeName: type.name,
+            name: name,
+            sellingPrice: sellingPrice,
+            buyingPrice: buyingPrice,
+            notes: _notesController.text,
+          )
+        : await notifier.addItem(
+            companyId: company.id,
+            companyName: company.name,
+            typeId: type.id,
+            typeName: type.name,
+            name: name,
+            sellingPrice: sellingPrice,
+            buyingPrice: buyingPrice,
+            notes: _notesController.text,
+          );
 
     if (!mounted) return;
 
@@ -127,14 +157,21 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
 
     switch (result) {
       case SaveResult.success:
-        CustomSnackbar.showSuccess(context, 'Item saved successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          _isEditing
+              ? 'Item updated successfully.'
+              : 'Item saved successfully.',
+        );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
         setState(() => _nameError = 'ITEM NAME has already existed before');
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not save the item. Please try again.',
+          _isEditing
+              ? 'Could not update the item. Please try again.'
+              : 'Could not save the item. Please try again.',
         );
     }
   }
@@ -190,6 +227,17 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
                 message:
                     'Add a type first before creating items. Items must have a type.',
               );
+            }
+
+            if (_selectedCompany == null && _isEditing) {
+              _selectedCompany = companies
+                  .where((company) => company.id == widget.existing!.companyId)
+                  .firstOrNull;
+            }
+            if (_selectedType == null && _isEditing) {
+              _selectedType = types
+                  .where((type) => type.id == widget.existing!.typeId)
+                  .firstOrNull;
             }
 
             return _buildForm(companies, types);
@@ -332,7 +380,11 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
             minLines: 3,
           ),
           SizedBox(height: AppSpacing.lg.h),
-          CustomButton(text: 'Save Item', onPressed: _save, loading: _isSaving),
+          CustomButton(
+            text: _isEditing ? 'Update Item' : 'Save Item',
+            onPressed: _save,
+            loading: _isSaving,
+          ),
         ],
       ),
     );

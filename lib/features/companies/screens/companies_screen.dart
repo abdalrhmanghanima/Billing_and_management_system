@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/company_exception.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
@@ -17,6 +18,7 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   String _query = '';
+  bool _isDeleting = false;
 
   @override
   void dispose() {
@@ -30,6 +32,60 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
       title: 'Add Company',
       builder: (_) => const CompanyFormSheet(),
     );
+  }
+
+  void _openEditCompanySheet(Company company) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Edit Company',
+      builder: (_) => CompanyFormSheet(existing: company),
+    );
+  }
+
+  Future<void> _confirmDeleteCompany(Company company) async {
+    if (_isDeleting) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete Company?',
+      message:
+          'Are you sure you want to delete "${company.name}"? '
+          'This action cannot be undone.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    setState(() => _isDeleting = true);
+
+    final result = await ref
+        .read(companiesProvider.notifier)
+        .deleteCompany(company.id);
+
+    if (!mounted) return;
+
+    setState(() => _isDeleting = false);
+
+    switch (result) {
+      case DeleteResult.success:
+        CustomSnackbar.showSuccess(context, 'Company deleted successfully.');
+      case DeleteResult.blocked:
+        final error = ref
+            .read(companiesProvider)
+            .maybeWhen(
+              error: (e, _) => e is CompanyException ? e : null,
+              orElse: () => null,
+            );
+        CustomSnackbar.showError(
+          context,
+          error?.message ??
+              'Cannot delete this company because it is used by existing types or items.',
+        );
+      case DeleteResult.failure:
+        CustomSnackbar.showError(
+          context,
+          'Could not delete the company. Please try again.',
+        );
+    }
   }
 
   List<Company> _filter(List<Company> companies) {
@@ -87,6 +143,8 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
                     companies: _filter(companies),
                     isSearching: _query.trim().isNotEmpty,
                     onAddCompany: _openAddCompanySheet,
+                    onEditCompany: _openEditCompanySheet,
+                    onDeleteCompany: _confirmDeleteCompany,
                   ),
                 ),
               ),
@@ -104,11 +162,15 @@ class _CompaniesList extends StatelessWidget {
     required this.companies,
     required this.isSearching,
     required this.onAddCompany,
+    required this.onEditCompany,
+    required this.onDeleteCompany,
   });
 
   final List<Company> companies;
   final bool isSearching;
   final VoidCallback onAddCompany;
+  final ValueChanged<Company> onEditCompany;
+  final ValueChanged<Company> onDeleteCompany;
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +212,30 @@ class _CompaniesList extends StatelessWidget {
           subtitle: company.notes.isEmpty
               ? 'No description notes'
               : company.notes,
+          showChevron: false,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomIconButton(
+                icon: Icons.edit_outlined,
+                onPressed: () => onEditCompany(company),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                tooltip: 'Edit',
+              ),
+              SizedBox(width: AppSpacing.xs.w),
+              CustomIconButton(
+                icon: Icons.delete_outline,
+                onPressed: () => onDeleteCompany(company),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                foregroundColor: AppColors.error,
+                tooltip: 'Delete',
+              ),
+            ],
+          ),
         );
       },
     );

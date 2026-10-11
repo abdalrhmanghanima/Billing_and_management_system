@@ -17,4 +17,14 @@ class CompanyRepositoryImpl implements CompanyRepository {
   Future<void> addCompany(Company company) {
     return _remoteDataSource.addCompany(CompanyModel.fromEntity(company));
   }
+
+  @override
+  Future<void> updateCompany(Company company) {
+    return _remoteDataSource.updateCompany(CompanyModel.fromEntity(company));
+  }
+
+  @override
+  Future<void> deleteCompany(String id) {
+    return _remoteDataSource.deleteCompany(id);
+  }
 }

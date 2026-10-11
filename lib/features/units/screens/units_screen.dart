@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/unit_exception.dart';
 import 'package:billing_and_sales_management/domain/units/entities/unit.dart';
 import 'package:billing_and_sales_management/features/units/providers/units_notifier.dart';
@@ -17,6 +18,7 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   String _query = '';
+  bool _isDeleting = false;
 
   @override
   void dispose() {
@@ -30,6 +32,51 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
       title: 'Add Unit',
       builder: (_) => const UnitFormSheet(),
     );
+  }
+
+  void _openEditUnitSheet(Unit unit) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Edit Unit',
+      builder: (_) => UnitFormSheet(existing: unit),
+    );
+  }
+
+  Future<void> _confirmDeleteUnit(Unit unit) async {
+    if (_isDeleting) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete Unit?',
+      message:
+          'Are you sure you want to delete "${unit.name}"? '
+          'This action cannot be undone.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    setState(() => _isDeleting = true);
+
+    final result = await ref.read(unitsProvider.notifier).deleteUnit(unit.id);
+
+    if (!mounted) return;
+
+    setState(() => _isDeleting = false);
+
+    switch (result) {
+      case DeleteResult.success:
+        CustomSnackbar.showSuccess(context, 'Unit deleted successfully.');
+      case DeleteResult.blocked:
+        CustomSnackbar.showError(
+          context,
+          'Cannot delete this unit right now. Please try again.',
+        );
+      case DeleteResult.failure:
+        CustomSnackbar.showError(
+          context,
+          'Could not delete the unit. Please try again.',
+        );
+    }
   }
 
   List<Unit> _filter(List<Unit> units) {
@@ -82,6 +129,8 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
                     units: _filter(units),
                     isSearching: _query.trim().isNotEmpty,
                     onAddUnit: _openAddUnitSheet,
+                    onEditUnit: _openEditUnitSheet,
+                    onDeleteUnit: _confirmDeleteUnit,
                   ),
                 ),
               ),
@@ -99,11 +148,15 @@ class _UnitsList extends StatelessWidget {
     required this.units,
     required this.isSearching,
     required this.onAddUnit,
+    required this.onEditUnit,
+    required this.onDeleteUnit,
   });
 
   final List<Unit> units;
   final bool isSearching;
   final VoidCallback onAddUnit;
+  final ValueChanged<Unit> onEditUnit;
+  final ValueChanged<Unit> onDeleteUnit;
 
   @override
   Widget build(BuildContext context) {
@@ -143,6 +196,30 @@ class _UnitsList extends StatelessWidget {
           avatarTone: EntityAvatarTone.cyan,
           title: unit.name,
           subtitle: unit.notes.isEmpty ? 'Unit of measurement' : unit.notes,
+          showChevron: false,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomIconButton(
+                icon: Icons.edit_outlined,
+                onPressed: () => onEditUnit(unit),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                tooltip: 'Edit',
+              ),
+              SizedBox(width: AppSpacing.xs.w),
+              CustomIconButton(
+                icon: Icons.delete_outline,
+                onPressed: () => onDeleteUnit(unit),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                foregroundColor: AppColors.error,
+                tooltip: 'Delete',
+              ),
+            ],
+          ),
         );
       },
     );

@@ -5,5 +5,9 @@ abstract interface class ClientRemoteDataSource {
 
   Future<void> addClient(ClientModel client);
 
+  Future<void> updateClient(ClientModel client);
+
+  Future<void> deleteClient(String id);
+
   Future<int> getNextClientNumber();
 }

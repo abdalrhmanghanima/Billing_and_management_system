@@ -61,6 +61,68 @@ class FirebaseCategoryRemoteDataSource implements CategoryRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> updateCategory(CategoryModel category) async {
+    final normalizedName = Category.normalizeName(category.name);
+    if (normalizedName.isEmpty) {
+      throw const CategoryException(CategoryExceptionCodes.nameRequired);
+    }
+
+    final oldId = category.id;
+    if (oldId.isEmpty) {
+      throw const CategoryException(CategoryExceptionCodes.notFound);
+    }
+
+    final newId = _documentIdFor(normalizedName);
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final oldDocument = _categories.doc(oldId);
+        final oldSnapshot = await transaction.get(oldDocument);
+        if (!oldSnapshot.exists) {
+          throw const CategoryException(CategoryExceptionCodes.notFound);
+        }
+
+        if (newId == oldId) {
+          transaction.set(oldDocument, category.toMap());
+          return;
+        }
+
+        final newDocument = _categories.doc(newId);
+        final newSnapshot = await transaction.get(newDocument);
+        if (newSnapshot.exists) {
+          throw const CategoryException(CategoryExceptionCodes.nameDuplicate);
+        }
+
+        transaction.delete(oldDocument);
+        transaction.set(newDocument, category.toMap());
+      });
+    } on FirebaseException catch (error) {
+      throw CategoryException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
+  @override
+  Future<void> deleteCategory(String id) async {
+    if (id.isEmpty) {
+      throw const CategoryException(CategoryExceptionCodes.notFound);
+    }
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final document = _categories.doc(id);
+        final snapshot = await transaction.get(document);
+        if (!snapshot.exists) {
+          throw const CategoryException(CategoryExceptionCodes.notFound);
+        }
+
+        transaction.delete(document);
+      });
+    } on FirebaseException catch (error) {
+      throw CategoryException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
   static String _documentIdFor(String normalizedName) {
     return base64Url.encode(utf8.encode(normalizedName));
   }

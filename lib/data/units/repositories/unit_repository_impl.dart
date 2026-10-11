@@ -17,4 +17,14 @@ class UnitRepositoryImpl implements UnitRepository {
   Future<void> addUnit(Unit unit) {
     return _remoteDataSource.addUnit(UnitModel.fromEntity(unit));
   }
+
+  @override
+  Future<void> updateUnit(Unit unit) {
+    return _remoteDataSource.updateUnit(UnitModel.fromEntity(unit));
+  }
+
+  @override
+  Future<void> deleteUnit(String id) {
+    return _remoteDataSource.deleteUnit(id);
+  }
 }

@@ -1,32 +1,49 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/domain/clients/entities/client.dart';
 import 'package:billing_and_sales_management/features/clients/providers/clients_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ClientFormSheet extends ConsumerStatefulWidget {
-  const ClientFormSheet({super.key});
+  const ClientFormSheet({super.key, this.existing});
+
+  final Client? existing;
 
   @override
   ConsumerState<ClientFormSheet> createState() => _ClientFormSheetState();
 }
 
 class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _addressController;
 
   String? _nameError;
   String? _phoneError;
   String? _addressError;
   bool _isSaving = false;
 
+  bool get _isEditing => widget.existing != null;
+
   static final RegExp _phoneRegex = RegExp(r'^[0-9]{11}$');
 
   @override
   void initState() {
     super.initState();
-    ref.invalidate(nextClientNumberProvider);
+    _nameController = TextEditingController(text: widget.existing?.name ?? '');
+    _phoneController = TextEditingController(
+      text: widget.existing?.phone ?? '',
+    );
+    _addressController = TextEditingController(
+      text: widget.existing?.address ?? '',
+    );
+    if (!_isEditing) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.invalidate(nextClientNumberProvider);
+      });
+    }
   }
 
   @override
@@ -63,9 +80,16 @@ class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
 
     setState(() => _isSaving = true);
 
-    final result = await ref
-        .read(clientsProvider.notifier)
-        .addClient(name: name, phone: phone, address: address);
+    final notifier = ref.read(clientsProvider.notifier);
+    final result = _isEditing
+        ? await notifier.updateClient(
+            id: widget.existing!.id,
+            number: widget.existing!.number,
+            name: name,
+            phone: phone,
+            address: address,
+          )
+        : await notifier.addClient(name: name, phone: phone, address: address);
 
     if (!mounted) return;
 
@@ -75,7 +99,9 @@ class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
       case SaveResult.success:
         CustomSnackbar.showSuccess(
           context,
-          'Client "$name" added successfully!',
+          _isEditing
+              ? 'Client updated successfully.'
+              : 'Client "$name" added successfully!',
         );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
@@ -83,20 +109,24 @@ class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not save the client. Please try again.',
+          _isEditing
+              ? 'Could not update the client. Please try again.'
+              : 'Could not save the client. Please try again.',
         );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final nextNumberText = ref
-        .watch(nextClientNumberProvider)
-        .maybeWhen(
-          data: (number) => '#$number',
-          error: (_, _) => 'Auto generated',
-          orElse: () => 'Generating...',
-        );
+    final nextNumberText = _isEditing
+        ? '#${widget.existing!.number}'
+        : ref
+              .watch(nextClientNumberProvider)
+              .maybeWhen(
+                data: (number) => '#$number',
+                error: (_, _) => 'Auto generated',
+                orElse: () => 'Generating...',
+              );
 
     return SingleChildScrollView(
       child: Column(
@@ -151,7 +181,7 @@ class _ClientFormSheetState extends ConsumerState<ClientFormSheet> {
           ),
           SizedBox(height: AppSpacing.lg.h),
           CustomButton(
-            text: 'Save Client',
+            text: _isEditing ? 'Update Client' : 'Save Client',
             onPressed: _save,
             loading: _isSaving,
           ),

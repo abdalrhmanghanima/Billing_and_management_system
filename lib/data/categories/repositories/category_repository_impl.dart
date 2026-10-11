@@ -17,4 +17,14 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<void> addCategory(Category category) {
     return _remoteDataSource.addCategory(CategoryModel.fromEntity(category));
   }
+
+  @override
+  Future<void> updateCategory(Category category) {
+    return _remoteDataSource.updateCategory(CategoryModel.fromEntity(category));
+  }
+
+  @override
+  Future<void> deleteCategory(String id) {
+    return _remoteDataSource.deleteCategory(id);
+  }
 }

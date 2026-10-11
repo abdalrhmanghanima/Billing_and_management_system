@@ -4,4 +4,8 @@ abstract interface class TypeRemoteDataSource {
   Future<List<ItemTypeModel>> getTypes();
 
   Future<void> addType(ItemTypeModel type);
+
+  Future<void> updateType(ItemTypeModel type);
+
+  Future<void> deleteType(String id);
 }

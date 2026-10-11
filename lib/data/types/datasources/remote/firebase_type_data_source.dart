@@ -61,6 +61,68 @@ class FirebaseTypeRemoteDataSource implements TypeRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> updateType(ItemTypeModel type) async {
+    final normalizedName = ItemType.normalizeName(type.name);
+    if (normalizedName.isEmpty) {
+      throw const TypeException(TypeExceptionCodes.nameRequired);
+    }
+
+    final oldId = type.id;
+    if (oldId.isEmpty) {
+      throw const TypeException(TypeExceptionCodes.notFound);
+    }
+
+    final newId = _documentIdFor(normalizedName);
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final oldDocument = _types.doc(oldId);
+        final oldSnapshot = await transaction.get(oldDocument);
+        if (!oldSnapshot.exists) {
+          throw const TypeException(TypeExceptionCodes.notFound);
+        }
+
+        if (newId == oldId) {
+          transaction.set(oldDocument, type.toMap());
+          return;
+        }
+
+        final newDocument = _types.doc(newId);
+        final newSnapshot = await transaction.get(newDocument);
+        if (newSnapshot.exists) {
+          throw const TypeException(TypeExceptionCodes.nameDuplicate);
+        }
+
+        transaction.delete(oldDocument);
+        transaction.set(newDocument, type.toMap());
+      });
+    } on FirebaseException catch (error) {
+      throw TypeException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
+  @override
+  Future<void> deleteType(String id) async {
+    if (id.isEmpty) {
+      throw const TypeException(TypeExceptionCodes.notFound);
+    }
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final document = _types.doc(id);
+        final snapshot = await transaction.get(document);
+        if (!snapshot.exists) {
+          throw const TypeException(TypeExceptionCodes.notFound);
+        }
+
+        transaction.delete(document);
+      });
+    } on FirebaseException catch (error) {
+      throw TypeException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
   static String _documentIdFor(String normalizedName) {
     return base64Url.encode(utf8.encode(normalizedName));
   }

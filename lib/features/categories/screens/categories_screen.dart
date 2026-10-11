@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/category_exception.dart';
 import 'package:billing_and_sales_management/domain/categories/entities/category.dart';
 import 'package:billing_and_sales_management/features/categories/providers/categories_notifier.dart';
@@ -17,6 +18,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   String _query = '';
+  bool _isDeleting = false;
 
   @override
   void dispose() {
@@ -30,6 +32,53 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
       title: 'Add Category',
       builder: (_) => const CategoryFormSheet(),
     );
+  }
+
+  void _openEditCategorySheet(Category category) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Edit Category',
+      builder: (_) => CategoryFormSheet(existing: category),
+    );
+  }
+
+  Future<void> _confirmDeleteCategory(Category category) async {
+    if (_isDeleting) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete Category?',
+      message:
+          'Are you sure you want to delete "${category.name}"? '
+          'This action cannot be undone.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    setState(() => _isDeleting = true);
+
+    final result = await ref
+        .read(categoriesProvider.notifier)
+        .deleteCategory(category.id);
+
+    if (!mounted) return;
+
+    setState(() => _isDeleting = false);
+
+    switch (result) {
+      case DeleteResult.success:
+        CustomSnackbar.showSuccess(context, 'Category deleted successfully.');
+      case DeleteResult.blocked:
+        CustomSnackbar.showError(
+          context,
+          'Cannot delete this category right now. Please try again.',
+        );
+      case DeleteResult.failure:
+        CustomSnackbar.showError(
+          context,
+          'Could not delete the category. Please try again.',
+        );
+    }
   }
 
   List<Category> _filter(List<Category> categories) {
@@ -85,6 +134,8 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                     categories: _filter(categories),
                     isSearching: _query.trim().isNotEmpty,
                     onAddCategory: _openAddCategorySheet,
+                    onEditCategory: _openEditCategorySheet,
+                    onDeleteCategory: _confirmDeleteCategory,
                   ),
                 ),
               ),
@@ -102,11 +153,15 @@ class _CategoriesList extends StatelessWidget {
     required this.categories,
     required this.isSearching,
     required this.onAddCategory,
+    required this.onEditCategory,
+    required this.onDeleteCategory,
   });
 
   final List<Category> categories;
   final bool isSearching;
   final VoidCallback onAddCategory;
+  final ValueChanged<Category> onEditCategory;
+  final ValueChanged<Category> onDeleteCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +203,30 @@ class _CategoriesList extends StatelessWidget {
           subtitle: category.notes.isEmpty
               ? 'Product category'
               : category.notes,
+          showChevron: false,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomIconButton(
+                icon: Icons.edit_outlined,
+                onPressed: () => onEditCategory(category),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                tooltip: 'Edit',
+              ),
+              SizedBox(width: AppSpacing.xs.w),
+              CustomIconButton(
+                icon: Icons.delete_outline,
+                onPressed: () => onDeleteCategory(category),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                foregroundColor: AppColors.error,
+                tooltip: 'Delete',
+              ),
+            ],
+          ),
         );
       },
     );

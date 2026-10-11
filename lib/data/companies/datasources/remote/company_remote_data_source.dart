@@ -4,4 +4,8 @@ abstract interface class CompanyRemoteDataSource {
   Future<List<CompanyModel>> getCompanies();
 
   Future<void> addCompany(CompanyModel company);
+
+  Future<void> updateCompany(CompanyModel company);
+
+  Future<void> deleteCompany(String id);
 }

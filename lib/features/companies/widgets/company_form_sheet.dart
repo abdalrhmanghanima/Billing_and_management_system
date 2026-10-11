@@ -1,22 +1,36 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class CompanyFormSheet extends ConsumerStatefulWidget {
-  const CompanyFormSheet({super.key});
+  const CompanyFormSheet({super.key, this.existing});
+
+  final Company? existing;
 
   @override
   ConsumerState<CompanyFormSheet> createState() => _CompanyFormSheetState();
 }
 
 class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _notesController;
 
   String? _nameError;
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.existing?.name ?? '');
+    _notesController = TextEditingController(
+      text: widget.existing?.notes ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -39,9 +53,14 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
       _isSaving = true;
     });
 
-    final result = await ref
-        .read(companiesProvider.notifier)
-        .addCompany(name: name, notes: _notesController.text);
+    final notifier = ref.read(companiesProvider.notifier);
+    final result = _isEditing
+        ? await notifier.updateCompany(
+            id: widget.existing!.id,
+            name: name,
+            notes: _notesController.text,
+          )
+        : await notifier.addCompany(name: name, notes: _notesController.text);
 
     if (!mounted) return;
 
@@ -49,14 +68,21 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
 
     switch (result) {
       case SaveResult.success:
-        CustomSnackbar.showSuccess(context, 'Company saved successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          _isEditing
+              ? 'Company updated successfully.'
+              : 'Company saved successfully.',
+        );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
         setState(() => _nameError = 'COMPANY NAME has already existed before');
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not save the company. Please try again.',
+          _isEditing
+              ? 'Could not update the company. Please try again.'
+              : 'Could not save the company. Please try again.',
         );
     }
   }
@@ -90,7 +116,7 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
         ),
         SizedBox(height: AppSpacing.lg.h),
         CustomButton(
-          text: 'Save Company',
+          text: _isEditing ? 'Update Company' : 'Save Company',
           onPressed: _save,
           loading: _isSaving,
         ),

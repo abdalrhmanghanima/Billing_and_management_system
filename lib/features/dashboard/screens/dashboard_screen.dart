@@ -1,6 +1,13 @@
+import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
+import 'package:billing_and_sales_management/features/clients/providers/clients_notifier.dart';
 import 'package:billing_and_sales_management/features/dashboard/models/dashboard_state.dart';
 import 'package:billing_and_sales_management/features/dashboard/providers/dashboard_provider.dart';
 import 'package:billing_and_sales_management/features/home/providers/selected_tab_provider.dart';
+import 'package:billing_and_sales_management/features/invoices/providers/invoices_notifier.dart';
+import 'package:billing_and_sales_management/features/invoices/screens/create_invoice_screen.dart';
+import 'package:billing_and_sales_management/features/invoices/screens/invoice_details_screen.dart';
+import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
+import 'package:billing_and_sales_management/features/reports/screens/reports_screen.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +17,6 @@ class DashboardScreen extends ConsumerWidget {
 
   static const int _clientsTabIndex = 1;
   static const int _itemsTabIndex = 2;
-  static const int _reportsTabIndex = 3;
   static const int _recentInvoiceLimit = 5;
 
   @override
@@ -19,6 +25,26 @@ class DashboardScreen extends ConsumerWidget {
 
     void openTab(int index) {
       ref.read(selectedTabProvider.notifier).select(index);
+    }
+
+    void openCreateInvoice() {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(builder: (_) => const CreateInvoiceScreen()),
+      );
+    }
+
+    void openInvoiceDetails(SalesInvoice invoice) {
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => InvoiceDetailsScreen(invoice: invoice),
+        ),
+      );
+    }
+
+    void openReports() {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const ReportsScreen()));
     }
 
     final recentInvoices = state.recentInvoices.length > _recentInvoiceLimit
@@ -44,20 +70,54 @@ class DashboardScreen extends ConsumerWidget {
               ),
             ),
             SizedBox(height: AppSpacing.base.h),
-            _SummaryStatsRow(state: state),
-            SizedBox(height: AppSpacing.lg.h),
+            if (state.isLoading) ...[
+              const Center(child: CustomLoading(color: AppColors.primary)),
+              SizedBox(height: AppSpacing.lg.h),
+            ] else if (state.errorMessage != null) ...[
+              CustomErrorState(
+                title: 'Could not load dashboard',
+                message: state.errorMessage,
+                onRetry: () {
+                  ref.invalidate(invoicesProvider);
+                  ref.invalidate(clientsProvider);
+                  ref.invalidate(itemsProvider);
+                },
+              ),
+              SizedBox(height: AppSpacing.lg.h),
+            ] else ...[
+              _SummaryStatsRow(state: state),
+              SizedBox(height: AppSpacing.lg.h),
+            ],
             _QuickActionsGrid(
+              onNewInvoice: openCreateInvoice,
               onAddClient: () => openTab(_clientsTabIndex),
               onAddItem: () => openTab(_itemsTabIndex),
-              onSalesReport: () => openTab(_reportsTabIndex),
+              onSalesReport: openReports,
             ),
             SizedBox(height: AppSpacing.xl.h),
             CustomSectionHeader(
               title: 'Recent Invoices',
               actionLabel: 'See All',
-              onAction: () => openTab(_reportsTabIndex),
+              onAction: openReports,
             ),
-            _RecentInvoicesList(invoices: recentInvoices),
+            if (state.isLoading)
+              CustomSkeleton(height: 64.h)
+            else if (state.errorMessage != null)
+              CustomErrorState(
+                title: 'Could not load invoices',
+                message: state.errorMessage,
+                onRetry: () => ref.invalidate(invoicesProvider),
+              )
+            else
+              _RecentInvoicesList(
+                invoices: recentInvoices,
+                onCreateInvoice: openCreateInvoice,
+                onInvoiceTap: (invoice) {
+                  if (invoice.invoice != null) {
+                    openInvoiceDetails(invoice.invoice!);
+                  }
+                },
+              ),
           ],
         ),
       ),
@@ -80,7 +140,7 @@ class _DashboardHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomText(
-                text: 'Good day 👋',
+                text: 'Good day',
                 style: AppTextStyles.caption,
                 fontWeight: FontWeight.w500,
                 color: AppColors.neutral500,
@@ -171,11 +231,13 @@ class _StatChip extends StatelessWidget {
 
 class _QuickActionsGrid extends StatelessWidget {
   const _QuickActionsGrid({
+    required this.onNewInvoice,
     required this.onAddClient,
     required this.onAddItem,
     required this.onSalesReport,
   });
 
+  final VoidCallback onNewInvoice;
   final VoidCallback onAddClient;
   final VoidCallback onAddItem;
   final VoidCallback onSalesReport;
@@ -186,12 +248,13 @@ class _QuickActionsGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: _ActionCard(
                 icon: Icons.receipt_long_outlined,
                 title: 'New Invoice',
                 iconColor: AppColors.coral,
                 iconBackground: AppColors.coralSubtle,
+                onTap: onNewInvoice,
               ),
             ),
             SizedBox(width: AppSpacing.cardGap.w),
@@ -283,9 +346,15 @@ class _ActionCard extends StatelessWidget {
 }
 
 class _RecentInvoicesList extends StatelessWidget {
-  const _RecentInvoicesList({required this.invoices});
+  const _RecentInvoicesList({
+    required this.invoices,
+    required this.onCreateInvoice,
+    required this.onInvoiceTap,
+  });
 
   final List<DashboardRecentInvoice> invoices;
+  final VoidCallback onCreateInvoice;
+  final ValueChanged<DashboardRecentInvoice> onInvoiceTap;
 
   @override
   Widget build(BuildContext context) {
@@ -297,7 +366,7 @@ class _RecentInvoicesList extends StatelessWidget {
         action: CustomButton(
           text: '+ Create Invoice',
           size: CustomButtonSize.small,
-          enabled: false,
+          onPressed: onCreateInvoice,
         ),
       );
     }
@@ -306,7 +375,10 @@ class _RecentInvoicesList extends StatelessWidget {
       children: [
         for (var i = 0; i < invoices.length; i++) ...[
           if (i > 0) SizedBox(height: AppSpacing.cardGap.h),
-          _RecentInvoiceTile(invoice: invoices[i]),
+          _RecentInvoiceTile(
+            invoice: invoices[i],
+            onTap: () => onInvoiceTap(invoices[i]),
+          ),
         ],
       ],
     );
@@ -314,24 +386,27 @@ class _RecentInvoicesList extends StatelessWidget {
 }
 
 class _RecentInvoiceTile extends StatelessWidget {
-  const _RecentInvoiceTile({required this.invoice});
+  const _RecentInvoiceTile({required this.invoice, this.onTap});
 
   final DashboardRecentInvoice invoice;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return CustomCard(
+      onTap: onTap,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       child: Row(
         children: [
           Container(
-            width: 40.r,
-            height: 40.r,
+            width: 55.r,
+            height: 35.r,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.primarySubtle,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd.r),
             ),
+            padding: EdgeInsets.only(left: 4.w,right: 4.w),
             child: CustomText(
               text: '#${invoice.billNumber}',
               style: AppTextStyles.label,

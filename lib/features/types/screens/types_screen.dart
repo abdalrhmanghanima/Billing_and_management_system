@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/type_exception.dart';
 import 'package:billing_and_sales_management/domain/types/entities/item_type.dart';
 import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
@@ -17,6 +18,7 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   String _query = '';
+  bool _isDeleting = false;
 
   @override
   void dispose() {
@@ -30,6 +32,58 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
       title: 'Add Type',
       builder: (_) => const TypeFormSheet(),
     );
+  }
+
+  void _openEditTypeSheet(ItemType type) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Edit Type',
+      builder: (_) => TypeFormSheet(existing: type),
+    );
+  }
+
+  Future<void> _confirmDeleteType(ItemType type) async {
+    if (_isDeleting) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete Type?',
+      message:
+          'Are you sure you want to delete "${type.name}"? '
+          'This action cannot be undone.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    setState(() => _isDeleting = true);
+
+    final result = await ref.read(typesProvider.notifier).deleteType(type.id);
+
+    if (!mounted) return;
+
+    setState(() => _isDeleting = false);
+
+    switch (result) {
+      case DeleteResult.success:
+        CustomSnackbar.showSuccess(context, 'Type deleted successfully.');
+      case DeleteResult.blocked:
+        final error = ref
+            .read(typesProvider)
+            .maybeWhen(
+              error: (e, _) => e is TypeException ? e : null,
+              orElse: () => null,
+            );
+        CustomSnackbar.showError(
+          context,
+          error?.message ??
+              'Cannot delete this type because it is used by existing items.',
+        );
+      case DeleteResult.failure:
+        CustomSnackbar.showError(
+          context,
+          'Could not delete the type. Please try again.',
+        );
+    }
   }
 
   List<ItemType> _filter(List<ItemType> types) {
@@ -86,6 +140,8 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
                     types: _filter(types),
                     isSearching: _query.trim().isNotEmpty,
                     onAddType: _openAddTypeSheet,
+                    onEditType: _openEditTypeSheet,
+                    onDeleteType: _confirmDeleteType,
                   ),
                 ),
               ),
@@ -103,11 +159,15 @@ class _TypesList extends StatelessWidget {
     required this.types,
     required this.isSearching,
     required this.onAddType,
+    required this.onEditType,
+    required this.onDeleteType,
   });
 
   final List<ItemType> types;
   final bool isSearching;
   final VoidCallback onAddType;
+  final ValueChanged<ItemType> onEditType;
+  final ValueChanged<ItemType> onDeleteType;
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +205,30 @@ class _TypesList extends StatelessWidget {
           avatarTone: EntityAvatarTone.primary,
           title: type.name,
           subtitle: type.companyName,
+          showChevron: false,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomIconButton(
+                icon: Icons.edit_outlined,
+                onPressed: () => onEditType(type),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                tooltip: 'Edit',
+              ),
+              SizedBox(width: AppSpacing.xs.w),
+              CustomIconButton(
+                icon: Icons.delete_outline,
+                onPressed: () => onDeleteType(type),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                foregroundColor: AppColors.error,
+                tooltip: 'Delete',
+              ),
+            ],
+          ),
         );
       },
     );

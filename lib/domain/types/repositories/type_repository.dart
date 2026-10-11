@@ -4,4 +4,8 @@ abstract interface class TypeRepository {
   Future<List<ItemType>> getTypes();
 
   Future<void> addType(ItemType type);
+
+  Future<void> updateType(ItemType type);
+
+  Future<void> deleteType(String id);
 }

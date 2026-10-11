@@ -4,6 +4,8 @@ class TypeExceptionCodes {
   static const String companyRequired = 'company-required';
   static const String nameRequired = 'name-required';
   static const String nameDuplicate = 'name-duplicate';
+  static const String notFound = 'not-found';
+  static const String inUse = 'in-use';
   static const String networkRequestFailed = 'network-request-failed';
   static const String unknown = 'unknown';
 }
@@ -21,6 +23,10 @@ class TypeException implements Exception {
         return 'TYPE NAME is Required';
       case TypeExceptionCodes.nameDuplicate:
         return 'TYPE NAME has already existed before';
+      case TypeExceptionCodes.notFound:
+        return 'This type no longer exists. It may have been deleted already.';
+      case TypeExceptionCodes.inUse:
+        return 'Cannot delete this type because it is used by existing items.';
       case TypeExceptionCodes.networkRequestFailed:
         return 'Network error. Please check your connection and try again.';
       default:

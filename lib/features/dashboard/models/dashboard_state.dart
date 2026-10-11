@@ -1,3 +1,5 @@
+import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
+
 class DashboardRecentInvoice {
   const DashboardRecentInvoice({
     required this.billNumber,
@@ -5,6 +7,7 @@ class DashboardRecentInvoice {
     required this.billDate,
     required this.billsTotal,
     required this.isPaid,
+    this.invoice,
   });
 
   final int billNumber;
@@ -12,18 +15,23 @@ class DashboardRecentInvoice {
   final String billDate;
   final double billsTotal;
   final bool isPaid;
+  final SalesInvoice? invoice;
 
   String get formattedBillsTotal => DashboardAmountFormatter.format(billsTotal);
 }
 
 class DashboardState {
   const DashboardState({
+    this.isLoading = false,
+    this.errorMessage,
     this.invoiceCount = 0,
     this.clientCount = 0,
     this.itemCount = 0,
     this.recentInvoices = const <DashboardRecentInvoice>[],
   });
 
+  final bool isLoading;
+  final String? errorMessage;
   final int invoiceCount;
   final int clientCount;
   final int itemCount;

@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/item_exception.dart';
 import 'package:billing_and_sales_management/domain/items/entities/item.dart';
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
@@ -17,6 +18,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   String _query = '';
+  bool _isDeleting = false;
 
   @override
   void dispose() {
@@ -30,6 +32,51 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
       title: 'Add Item',
       builder: (_) => const ItemFormSheet(),
     );
+  }
+
+  void _openEditItemSheet(Item item) {
+    showAppBottomSheet<void>(
+      context: context,
+      title: 'Edit Item',
+      builder: (_) => ItemFormSheet(existing: item),
+    );
+  }
+
+  Future<void> _confirmDeleteItem(Item item) async {
+    if (_isDeleting) return;
+
+    final confirmed = await showConfirmDeleteDialog(
+      context: context,
+      title: 'Delete Item?',
+      message:
+          'Are you sure you want to delete "${item.name}"? '
+          'This action cannot be undone.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    setState(() => _isDeleting = true);
+
+    final result = await ref.read(itemsProvider.notifier).deleteItem(item.id);
+
+    if (!mounted) return;
+
+    setState(() => _isDeleting = false);
+
+    switch (result) {
+      case DeleteResult.success:
+        CustomSnackbar.showSuccess(context, 'Item deleted successfully.');
+      case DeleteResult.blocked:
+        CustomSnackbar.showError(
+          context,
+          'Cannot delete this item right now. Please try again.',
+        );
+      case DeleteResult.failure:
+        CustomSnackbar.showError(
+          context,
+          'Could not delete the item. Please try again.',
+        );
+    }
   }
 
   List<Item> _filter(List<Item> items) {
@@ -88,6 +135,8 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
                     items: _filter(items),
                     isSearching: _query.trim().isNotEmpty,
                     onAddItem: _openAddItemSheet,
+                    onEditItem: _openEditItemSheet,
+                    onDeleteItem: _confirmDeleteItem,
                     formatPrice: _formatPrice,
                   ),
                 ),
@@ -107,12 +156,16 @@ class _ItemsList extends StatelessWidget {
     required this.items,
     required this.isSearching,
     required this.onAddItem,
+    required this.onEditItem,
+    required this.onDeleteItem,
     required this.formatPrice,
   });
 
   final List<Item> items;
   final bool isSearching;
   final VoidCallback onAddItem;
+  final ValueChanged<Item> onEditItem;
+  final ValueChanged<Item> onDeleteItem;
   final String Function(double) formatPrice;
 
   @override
@@ -154,6 +207,30 @@ class _ItemsList extends StatelessWidget {
           title: item.name,
           subtitle: '${item.companyName} • ${item.typeName}',
           trailingText: formatPrice(item.sellingPrice),
+          showChevron: false,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomIconButton(
+                icon: Icons.edit_outlined,
+                onPressed: () => onEditItem(item),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                tooltip: 'Edit',
+              ),
+              SizedBox(width: AppSpacing.xs.w),
+              CustomIconButton(
+                icon: Icons.delete_outline,
+                onPressed: () => onDeleteItem(item),
+                size: AppDimensions.headerActionSize,
+                iconSize: AppDimensions.iconSm,
+                shadow: false,
+                foregroundColor: AppColors.error,
+                tooltip: 'Delete',
+              ),
+            ],
+          ),
         );
       },
     );

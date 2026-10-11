@@ -1,22 +1,36 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/domain/units/entities/unit.dart';
 import 'package:billing_and_sales_management/features/units/providers/units_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class UnitFormSheet extends ConsumerStatefulWidget {
-  const UnitFormSheet({super.key});
+  const UnitFormSheet({super.key, this.existing});
+
+  final Unit? existing;
 
   @override
   ConsumerState<UnitFormSheet> createState() => _UnitFormSheetState();
 }
 
 class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _notesController;
 
   String? _nameError;
   bool _isSaving = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.existing?.name ?? '');
+    _notesController = TextEditingController(
+      text: widget.existing?.notes ?? '',
+    );
+  }
 
   @override
   void dispose() {
@@ -39,9 +53,14 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
       _isSaving = true;
     });
 
-    final result = await ref
-        .read(unitsProvider.notifier)
-        .addUnit(name: name, notes: _notesController.text);
+    final notifier = ref.read(unitsProvider.notifier);
+    final result = _isEditing
+        ? await notifier.updateUnit(
+            id: widget.existing!.id,
+            name: name,
+            notes: _notesController.text,
+          )
+        : await notifier.addUnit(name: name, notes: _notesController.text);
 
     if (!mounted) return;
 
@@ -49,14 +68,21 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
 
     switch (result) {
       case SaveResult.success:
-        CustomSnackbar.showSuccess(context, 'Unit saved successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          _isEditing
+              ? 'Unit updated successfully.'
+              : 'Unit saved successfully.',
+        );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
         setState(() => _nameError = 'UNIT NAME has already existed before');
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not save the unit. Please try again.',
+          _isEditing
+              ? 'Could not update the unit. Please try again.'
+              : 'Could not save the unit. Please try again.',
         );
     }
   }
@@ -89,7 +115,11 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
           minLines: 3,
         ),
         SizedBox(height: AppSpacing.lg.h),
-        CustomButton(text: 'Save Unit', onPressed: _save, loading: _isSaving),
+        CustomButton(
+          text: _isEditing ? 'Update Unit' : 'Save Unit',
+          onPressed: _save,
+          loading: _isSaving,
+        ),
       ],
     );
   }

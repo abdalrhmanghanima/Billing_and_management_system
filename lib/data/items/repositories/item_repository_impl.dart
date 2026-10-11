@@ -17,4 +17,14 @@ class ItemRepositoryImpl implements ItemRepository {
   Future<void> addItem(Item item) {
     return _remoteDataSource.addItem(ItemModel.fromEntity(item));
   }
+
+  @override
+  Future<void> updateItem(Item item) {
+    return _remoteDataSource.updateItem(ItemModel.fromEntity(item));
+  }
+
+  @override
+  Future<void> deleteItem(String id) {
+    return _remoteDataSource.deleteItem(id);
+  }
 }

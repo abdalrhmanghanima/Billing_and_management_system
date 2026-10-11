@@ -4,4 +4,8 @@ abstract interface class ItemRemoteDataSource {
   Future<List<ItemModel>> getItems();
 
   Future<void> addItem(ItemModel item);
+
+  Future<void> updateItem(ItemModel item);
+
+  Future<void> deleteItem(String id);
 }

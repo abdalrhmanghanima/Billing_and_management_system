@@ -17,4 +17,14 @@ class TypeRepositoryImpl implements TypeRepository {
   Future<void> addType(ItemType type) {
     return _remoteDataSource.addType(ItemTypeModel.fromEntity(type));
   }
+
+  @override
+  Future<void> updateType(ItemType type) {
+    return _remoteDataSource.updateType(ItemTypeModel.fromEntity(type));
+  }
+
+  @override
+  Future<void> deleteType(String id) {
+    return _remoteDataSource.deleteType(id);
+  }
 }

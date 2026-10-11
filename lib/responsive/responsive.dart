@@ -40,6 +40,7 @@ export 'package:billing_and_sales_management/responsive/widgets/custom_button.da
 export 'package:billing_and_sales_management/responsive/widgets/custom_card.dart';
 export 'package:billing_and_sales_management/responsive/widgets/custom_chip.dart';
 export 'package:billing_and_sales_management/responsive/widgets/custom_dialog.dart';
+export 'package:billing_and_sales_management/responsive/widgets/confirm_delete_dialog.dart';
 export 'package:billing_and_sales_management/responsive/widgets/custom_divider.dart';
 export 'package:billing_and_sales_management/responsive/widgets/custom_dropdown.dart';
 export 'package:billing_and_sales_management/responsive/widgets/custom_empty_state.dart';

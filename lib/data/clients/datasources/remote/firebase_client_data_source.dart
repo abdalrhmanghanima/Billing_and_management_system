@@ -88,6 +88,68 @@ class FirebaseClientRemoteDataSource implements ClientRemoteDataSource {
     }
   }
 
+  @override
+  Future<void> updateClient(ClientModel client) async {
+    final normalizedName = Client.normalizeName(client.name);
+    if (normalizedName.isEmpty) {
+      throw const ClientException(ClientExceptionCodes.nameRequired);
+    }
+
+    final oldId = client.id;
+    if (oldId.isEmpty) {
+      throw const ClientException(ClientExceptionCodes.notFound);
+    }
+
+    final newId = _documentIdFor(normalizedName);
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final oldDocument = _clients.doc(oldId);
+        final oldSnapshot = await transaction.get(oldDocument);
+        if (!oldSnapshot.exists) {
+          throw const ClientException(ClientExceptionCodes.notFound);
+        }
+
+        if (newId == oldId) {
+          transaction.set(oldDocument, client.toMap());
+          return;
+        }
+
+        final newDocument = _clients.doc(newId);
+        final newSnapshot = await transaction.get(newDocument);
+        if (newSnapshot.exists) {
+          throw const ClientException(ClientExceptionCodes.nameDuplicate);
+        }
+
+        transaction.delete(oldDocument);
+        transaction.set(newDocument, client.toMap());
+      });
+    } on FirebaseException catch (error) {
+      throw ClientException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
+  @override
+  Future<void> deleteClient(String id) async {
+    if (id.isEmpty) {
+      throw const ClientException(ClientExceptionCodes.notFound);
+    }
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final document = _clients.doc(id);
+        final snapshot = await transaction.get(document);
+        if (!snapshot.exists) {
+          throw const ClientException(ClientExceptionCodes.notFound);
+        }
+
+        transaction.delete(document);
+      });
+    } on FirebaseException catch (error) {
+      throw ClientException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
   static int _nextNumberFrom(
     DocumentSnapshot<Map<String, dynamic>> counterSnapshot,
   ) {
