@@ -30,6 +30,9 @@ class AppColors {
   static const Color coralSubtle = Color(0xFFFFF2ED);
   static const Color coralBorder = Color(0xFFFFD4C4);
 
+  static const Color purple = Color(0xFF7E22CE);
+  static const Color purpleSubtle = Color(0xFFF3E8FF);
+
   // Semantic feedback.
   static const Color success = Color(0xFF10B981);
   static const Color successBg = Color(0xFFECFDF5);
