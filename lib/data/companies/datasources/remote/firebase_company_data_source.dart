@@ -12,9 +12,18 @@ class FirebaseCompanyRemoteDataSource implements CompanyRemoteDataSource {
   final FirebaseFirestore _firestore;
 
   static const String _collection = 'companies';
+  static const String _typesCollection = 'types';
+  static const String _itemsCollection = 'items';
+  static const int _maxTransactionWrites = 500;
 
   CollectionReference<Map<String, dynamic>> get _companies =>
       _firestore.collection(_collection);
+
+  CollectionReference<Map<String, dynamic>> get _types =>
+      _firestore.collection(_typesCollection);
+
+  CollectionReference<Map<String, dynamic>> get _items =>
+      _firestore.collection(_itemsCollection);
 
   @override
   Future<List<CompanyModel>> getCompanies() async {
@@ -74,8 +83,34 @@ class FirebaseCompanyRemoteDataSource implements CompanyRemoteDataSource {
     }
 
     final newId = _documentIdFor(normalizedName);
+    final renamesDocument = newId != oldId;
 
     try {
+      var typeIds = const <String>[];
+      var itemIds = const <String>[];
+      var cascadeReferences = renamesDocument;
+
+      if (renamesDocument) {
+        typeIds = await _typeIdsReferencing(oldId);
+        itemIds = await _itemIdsReferencing(oldId);
+      } else {
+        final storedName = await _storedName(oldId);
+        if (storedName == null) {
+          throw const CompanyException(CompanyExceptionCodes.notFound);
+        }
+        cascadeReferences = storedName != company.name;
+        if (cascadeReferences) {
+          typeIds = await _typeIdsReferencing(oldId);
+          itemIds = await _itemIdsReferencing(oldId);
+        }
+      }
+
+      final writeCount =
+          typeIds.length + itemIds.length + (renamesDocument ? 2 : 1);
+      if (writeCount > _maxTransactionWrites) {
+        throw const CompanyException(CompanyExceptionCodes.tooManyReferences);
+      }
+
       await _firestore.runTransaction((transaction) async {
         final oldDocument = _companies.doc(oldId);
         final oldSnapshot = await transaction.get(oldDocument);
@@ -83,19 +118,32 @@ class FirebaseCompanyRemoteDataSource implements CompanyRemoteDataSource {
           throw const CompanyException(CompanyExceptionCodes.notFound);
         }
 
-        if (newId == oldId) {
+        if (renamesDocument) {
+          final newDocument = _companies.doc(newId);
+          final newSnapshot = await transaction.get(newDocument);
+          if (newSnapshot.exists) {
+            throw const CompanyException(CompanyExceptionCodes.nameDuplicate);
+          }
+
+          transaction.delete(oldDocument);
+          transaction.set(newDocument, company.toMap());
+        } else {
           transaction.set(oldDocument, company.toMap());
-          return;
         }
 
-        final newDocument = _companies.doc(newId);
-        final newSnapshot = await transaction.get(newDocument);
-        if (newSnapshot.exists) {
-          throw const CompanyException(CompanyExceptionCodes.nameDuplicate);
-        }
+        if (!cascadeReferences) return;
 
-        transaction.delete(oldDocument);
-        transaction.set(newDocument, company.toMap());
+        final referenceUpdates = <String, dynamic>{
+          'companyName': company.name,
+          if (renamesDocument) 'companyId': newId,
+        };
+
+        for (final typeId in typeIds) {
+          transaction.update(_types.doc(typeId), referenceUpdates);
+        }
+        for (final itemId in itemIds) {
+          transaction.update(_items.doc(itemId), referenceUpdates);
+        }
       });
     } on FirebaseException catch (error) {
       throw CompanyException(mapFirebaseFirestoreErrorCode(error.code));
@@ -121,6 +169,26 @@ class FirebaseCompanyRemoteDataSource implements CompanyRemoteDataSource {
     } on FirebaseException catch (error) {
       throw CompanyException(mapFirebaseFirestoreErrorCode(error.code));
     }
+  }
+
+  Future<String?> _storedName(String id) async {
+    final snapshot = await _companies.doc(id).get();
+    if (!snapshot.exists) return null;
+    return snapshot.data()?['name'] as String?;
+  }
+
+  Future<List<String>> _typeIdsReferencing(String companyId) async {
+    final snapshot = await _types
+        .where('companyId', isEqualTo: companyId)
+        .get();
+    return snapshot.docs.map((doc) => doc.id).toList();
+  }
+
+  Future<List<String>> _itemIdsReferencing(String companyId) async {
+    final snapshot = await _items
+        .where('companyId', isEqualTo: companyId)
+        .get();
+    return snapshot.docs.map((doc) => doc.id).toList();
   }
 
   static String _documentIdFor(String normalizedName) {

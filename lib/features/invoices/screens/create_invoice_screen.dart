@@ -204,6 +204,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     if (sellingPriceText.isNotEmpty &&
         !_numberRegex.hasMatch(sellingPriceText)) {
       sellingPriceError = 'Invalid number';
+    } else if (sellingPriceText.isNotEmpty &&
+        (double.tryParse(sellingPriceText) ?? 0) < 0) {
+      sellingPriceError = 'SELLING PRICE Must be Greater than or equal Zero';
     }
 
     String? discountError;

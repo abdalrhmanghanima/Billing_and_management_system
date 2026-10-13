@@ -4,6 +4,7 @@ import 'package:billing_and_sales_management/features/categories/providers/categ
 import 'package:billing_and_sales_management/features/categories/screens/categories_screen.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/features/companies/screens/companies_screen.dart';
+import 'package:billing_and_sales_management/features/request_forms/screens/request_form_screen.dart';
 import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
 import 'package:billing_and_sales_management/features/types/screens/types_screen.dart';
 import 'package:billing_and_sales_management/features/units/providers/units_notifier.dart';
@@ -39,8 +40,10 @@ class MoreScreen extends ConsumerWidget {
     );
   }
 
-  void _showRequestFormInfo(BuildContext context) {
-    CustomSnackbar.showInfo(context, 'Request a Form is not available yet.');
+  void _openRequestForm(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (context) => const RequestFormScreen()),
+    );
   }
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
@@ -111,7 +114,7 @@ class MoreScreen extends ConsumerWidget {
               onTypes: () => _openTypes(context),
               onUnits: () => _openUnits(context),
               onCategories: () => _openCategories(context),
-              onRequestForm: () => _showRequestFormInfo(context),
+              onRequestForm: () => _openRequestForm(context),
             ),
             SizedBox(height: AppSpacing.xl.h),
             const CustomDivider(),

@@ -8,6 +8,7 @@ import 'package:billing_and_sales_management/domain/types/usecases/add_type.dart
 import 'package:billing_and_sales_management/domain/types/usecases/delete_type.dart';
 import 'package:billing_and_sales_management/domain/types/usecases/get_types.dart';
 import 'package:billing_and_sales_management/domain/types/usecases/update_type.dart';
+import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final getTypesUseCaseProvider = Provider<GetTypes>(
@@ -107,6 +108,7 @@ class TypesNotifier extends AsyncNotifier<List<ItemType>> {
     }
 
     await refresh();
+    ref.invalidate(itemsProvider);
 
     return SaveResult.success;
   }

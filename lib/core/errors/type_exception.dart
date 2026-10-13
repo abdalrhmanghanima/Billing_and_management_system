@@ -6,6 +6,7 @@ class TypeExceptionCodes {
   static const String nameDuplicate = 'name-duplicate';
   static const String notFound = 'not-found';
   static const String inUse = 'in-use';
+  static const String tooManyReferences = 'too-many-references';
   static const String networkRequestFailed = 'network-request-failed';
   static const String unknown = 'unknown';
 }
@@ -27,6 +28,8 @@ class TypeException implements Exception {
         return 'This type no longer exists. It may have been deleted already.';
       case TypeExceptionCodes.inUse:
         return 'Cannot delete this type because it is used by existing items.';
+      case TypeExceptionCodes.tooManyReferences:
+        return 'Cannot update this type because too many items are linked to it.';
       case TypeExceptionCodes.networkRequestFailed:
         return 'Network error. Please check your connection and try again.';
       default:

@@ -9,6 +9,8 @@ import 'package:billing_and_sales_management/domain/companies/usecases/add_compa
 import 'package:billing_and_sales_management/domain/companies/usecases/delete_company.dart';
 import 'package:billing_and_sales_management/domain/companies/usecases/get_companies.dart';
 import 'package:billing_and_sales_management/domain/companies/usecases/update_company.dart';
+import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
+import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final getCompaniesUseCaseProvider = Provider<GetCompanies>(
@@ -90,6 +92,8 @@ class CompaniesNotifier extends AsyncNotifier<List<Company>> {
     }
 
     await refresh();
+    ref.invalidate(typesProvider);
+    ref.invalidate(itemsProvider);
 
     return SaveResult.success;
   }
