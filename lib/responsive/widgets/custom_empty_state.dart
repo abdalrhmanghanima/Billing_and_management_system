@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
@@ -29,6 +29,8 @@ class CustomEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -42,20 +44,20 @@ class CustomEmptyState extends StatelessWidget {
               width: AppDimensions.emptyStateIconBox.r,
               height: AppDimensions.emptyStateIconBox.r,
               decoration: BoxDecoration(
-                color: iconBackgroundColor ?? AppColors.primarySubtle,
+                color: iconBackgroundColor ?? palette.primarySubtle,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: AppDimensions.stateIconSize.r,
-                color: iconColor ?? AppColors.primary,
+                color: iconColor ?? palette.accentText,
               ),
             ),
             SizedBox(height: AppSpacing.base.h),
             CustomText(
               text: title,
               style: AppTextStyles.sectionTitle,
-              color: AppColors.neutral900,
+              color: palette.textPrimary,
               textAlign: TextAlign.center,
             ),
             if (message != null) ...[
@@ -67,7 +69,7 @@ class CustomEmptyState extends StatelessWidget {
                   style: AppTextStyles.bodySmall.copyWith(
                     height: AppTextStyles.heightRelaxed,
                   ),
-                  color: AppColors.neutral500,
+                  color: palette.textMuted,
                   textAlign: TextAlign.center,
                   maxLines: 4,
                 ),

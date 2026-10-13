@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_shadows.dart';
 
 /// Round icon button matching the design's `.icon-btn` / `.header-action-btn`:
@@ -47,16 +47,17 @@ class CustomIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final radius = borderRadius ?? size;
-    final bg = backgroundColor ?? AppColors.white;
-    final fg = foregroundColor ?? AppColors.neutral700;
+    final bg = backgroundColor ?? palette.surface;
+    final fg = foregroundColor ?? palette.textStrong;
 
     final button = Material(
       color: bg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radius.r),
         side: bordered
-            ? BorderSide(color: borderColor ?? AppColors.neutral200)
+            ? BorderSide(color: borderColor ?? palette.border)
             : BorderSide.none,
       ),
       clipBehavior: Clip.antiAlias,
@@ -64,7 +65,7 @@ class CustomIconButton extends StatelessWidget {
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(radius.r),
-        overlayColor: const WidgetStatePropertyAll(AppColors.neutral100),
+        overlayColor: WidgetStatePropertyAll(palette.overlayHover),
         child: SizedBox(
           width: size.r,
           height: size.r,

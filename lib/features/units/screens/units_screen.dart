@@ -1,9 +1,11 @@
 import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/unit_exception.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/units/entities/unit.dart';
 import 'package:billing_and_sales_management/features/units/providers/units_notifier.dart';
 import 'package:billing_and_sales_management/features/units/widgets/unit_form_sheet.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +31,7 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
   void _openAddUnitSheet() {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Add Unit',
+      title: AppTranslate.addUnit.tr(),
       builder: (_) => const UnitFormSheet(),
     );
   }
@@ -37,7 +39,7 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
   void _openEditUnitSheet(Unit unit) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Edit Unit',
+      title: AppTranslate.editUnit.tr(),
       builder: (_) => UnitFormSheet(existing: unit),
     );
   }
@@ -47,10 +49,10 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: 'Delete Unit?',
-      message:
-          'Are you sure you want to delete "${unit.name}"? '
-          'This action cannot be undone.',
+      title: AppTranslate.deleteUnitQuestion.tr(),
+      message: AppTranslate.deleteConfirmationMessage.tr(
+        namedArgs: {'name': unit.name},
+      ),
     );
 
     if (!confirmed || !mounted) return;
@@ -65,17 +67,17 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
 
     switch (result) {
       case DeleteResult.success:
-        CustomSnackbar.showSuccess(context, 'Unit deleted successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          AppTranslate.unitDeletedSuccessfully.tr(),
+        );
       case DeleteResult.blocked:
         CustomSnackbar.showError(
           context,
-          'Cannot delete this unit right now. Please try again.',
+          AppTranslate.cannotDeleteUnitRightNow.tr(),
         );
       case DeleteResult.failure:
-        CustomSnackbar.showError(
-          context,
-          'Could not delete the unit. Please try again.',
-        );
+        CustomSnackbar.showError(context, AppTranslate.couldNotDeleteUnit.tr());
     }
   }
 
@@ -93,10 +95,9 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
     final unitsState = ref.watch(unitsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Units',
-        subtitle: 'Measurement & Packaging',
+      appBar: CustomAppBar(
+        title: AppTranslate.units.tr(),
+        subtitle: AppTranslate.unitsSubtitle.tr(),
       ),
       floatingActionButton: _AddUnitButton(onPressed: _openAddUnitSheet),
       body: MaxWidthBox(
@@ -111,7 +112,7 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
               SizedBox(height: AppSpacing.base.h),
               CustomSearchBar(
                 controller: _searchController,
-                hint: 'Search units...',
+                hint: AppTranslate.searchUnits.tr(),
                 onChanged: (value) => setState(() => _query = value),
               ),
               SizedBox(height: AppSpacing.base.h),
@@ -119,10 +120,10 @@ class _UnitsScreenState extends ConsumerState<UnitsScreen> {
                 child: unitsState.when(
                   loading: () => const CustomSkeletonList(count: 4),
                   error: (error, _) => CustomErrorState(
-                    title: 'Could not load units',
+                    title: AppTranslate.couldNotLoadUnits.tr(),
                     message: error is UnitException
                         ? error.message
-                        : 'Something went wrong. Please try again.',
+                        : AppTranslate.somethingWentWrong.tr(),
                     onRetry: () => ref.read(unitsProvider.notifier).refresh(),
                   ),
                   data: (units) => _UnitsList(
@@ -162,21 +163,21 @@ class _UnitsList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (units.isEmpty) {
       if (isSearching) {
-        return const CustomEmptyState(
+        return CustomEmptyState(
           icon: Icons.search_off_outlined,
-          title: 'No Units Found',
-          message: 'No units match your search.',
+          title: AppTranslate.noUnitsFound.tr(),
+          message: AppTranslate.noUnitsMatchSearch.tr(),
         );
       }
 
       return CustomEmptyState(
         icon: Icons.table_chart_outlined,
-        iconColor: AppColors.cyanDark,
-        iconBackgroundColor: AppColors.cyanLight,
-        title: 'No Units Defined',
-        message: 'Define packaging units like Piece, Box, Kg, etc.',
+        iconColor: context.palette.cyanText,
+        iconBackgroundColor: context.palette.cyanLight,
+        title: AppTranslate.noUnitsDefined.tr(),
+        message: AppTranslate.definePackagingUnitsMessage.tr(),
         action: CustomButton(
-          text: '+ Add Unit',
+          text: AppTranslate.plusAddUnit.tr(),
           size: CustomButtonSize.small,
           width: 200.w,
           onPressed: onAddUnit,
@@ -195,7 +196,9 @@ class _UnitsList extends StatelessWidget {
           avatarIcon: Icons.table_chart_outlined,
           avatarTone: EntityAvatarTone.cyan,
           title: unit.name,
-          subtitle: unit.notes.isEmpty ? 'Unit of measurement' : unit.notes,
+          subtitle: unit.notes.isEmpty
+              ? AppTranslate.unitOfMeasurement.tr()
+              : unit.notes,
           showChevron: false,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
@@ -206,7 +209,7 @@ class _UnitsList extends StatelessWidget {
                 size: AppDimensions.headerActionSize,
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
-                tooltip: 'Edit',
+                tooltip: AppTranslate.edit.tr(),
               ),
               SizedBox(width: AppSpacing.xs.w),
               CustomIconButton(
@@ -216,7 +219,7 @@ class _UnitsList extends StatelessWidget {
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
                 foregroundColor: AppColors.error,
-                tooltip: 'Delete',
+                tooltip: AppTranslate.delete.tr(),
               ),
             ],
           ),

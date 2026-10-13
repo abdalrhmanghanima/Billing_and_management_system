@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_shadows.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 
@@ -56,6 +56,7 @@ class CustomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final effectiveRadius = radius ?? AppDimensions.cardRadius;
     final radiusValue = effectiveRadius.r;
     final card = Container(
@@ -68,9 +69,9 @@ class CustomCard extends StatelessWidget {
             vertical: AppSpacing.cardPaddingVertical.h,
           ),
       decoration: BoxDecoration(
-        color: color ?? Theme.of(context).colorScheme.surface,
+        color: color ?? Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(radiusValue),
-        border: border ?? Border.all(color: AppColors.border),
+        border: border ?? Border.all(color: palette.border),
         boxShadow: shadow ?? AppShadows.card(elevation: elevation),
       ),
       child: child,
@@ -87,7 +88,7 @@ class CustomCard extends StatelessWidget {
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(radiusValue),
         overlayColor: WidgetStatePropertyAll(
-          AppColors.neutral100.withValues(alpha: 0.6),
+          palette.overlayHover.withValues(alpha: 0.6),
         ),
         child: card,
       ),

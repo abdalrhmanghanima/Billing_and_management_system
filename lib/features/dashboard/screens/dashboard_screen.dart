@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
 import 'package:billing_and_sales_management/features/clients/providers/clients_notifier.dart';
 import 'package:billing_and_sales_management/features/dashboard/models/dashboard_state.dart';
@@ -9,6 +10,7 @@ import 'package:billing_and_sales_management/features/invoices/screens/invoice_d
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
 import 'package:billing_and_sales_management/features/reports/screens/reports_screen.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,70 +57,76 @@ class DashboardScreen extends ConsumerWidget {
       bottom: false,
       child: MaxWidthBox(
         maxWidth: AppDimensions.maxContentWidth,
-        child: ListView(
-          padding: EdgeInsets.fromLTRB(
-            AppSpacing.pageHorizontal.w,
-            AppSpacing.base.h,
-            AppSpacing.pageHorizontal.w,
-            AppSpacing.xl.h,
-          ),
-          children: [
-            _DashboardHeader(
-              onNotificationsTap: () => CustomSnackbar.showInfo(
-                context,
-                'No new notifications at this time.',
-              ),
+        child: RefreshIndicator(
+          color: context.palette.accentText,
+          onRefresh: () async {
+            await Future.wait([
+              ref.read(invoicesProvider.notifier).refresh(),
+              ref.read(clientsProvider.notifier).refresh(),
+              ref.read(itemsProvider.notifier).refresh(),
+            ]);
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(
+              AppSpacing.pageHorizontal.w,
+              AppSpacing.base.h,
+              AppSpacing.pageHorizontal.w,
+              AppSpacing.xl.h,
             ),
-            SizedBox(height: AppSpacing.base.h),
-            if (state.isLoading) ...[
-              const Center(child: CustomLoading(color: AppColors.primary)),
-              SizedBox(height: AppSpacing.lg.h),
-            ] else if (state.errorMessage != null) ...[
-              CustomErrorState(
-                title: 'Could not load dashboard',
-                message: state.errorMessage,
-                onRetry: () {
-                  ref.invalidate(invoicesProvider);
-                  ref.invalidate(clientsProvider);
-                  ref.invalidate(itemsProvider);
-                },
+            children: [
+              _DashboardHeader(),
+              SizedBox(height: AppSpacing.base.h),
+              if (state.isLoading) ...[
+                Center(child: CustomLoading(color: context.palette.accentText)),
+                SizedBox(height: AppSpacing.lg.h),
+              ] else if (state.errorMessage != null) ...[
+                CustomErrorState(
+                  title: AppTranslate.couldNotLoadDashboard.tr(),
+                  message: state.errorMessage,
+                  onRetry: () {
+                    ref.invalidate(invoicesProvider);
+                    ref.invalidate(clientsProvider);
+                    ref.invalidate(itemsProvider);
+                  },
+                ),
+                SizedBox(height: AppSpacing.lg.h),
+              ] else ...[
+                _SummaryStatsRow(state: state),
+                SizedBox(height: AppSpacing.lg.h),
+              ],
+              _QuickActionsGrid(
+                onNewInvoice: openCreateInvoice,
+                onAddClient: () => openTab(_clientsTabIndex),
+                onAddItem: () => openTab(_itemsTabIndex),
+                onSalesReport: openReports,
               ),
-              SizedBox(height: AppSpacing.lg.h),
-            ] else ...[
-              _SummaryStatsRow(state: state),
-              SizedBox(height: AppSpacing.lg.h),
+              SizedBox(height: AppSpacing.xl.h),
+              CustomSectionHeader(
+                title: AppTranslate.recentInvoices.tr(),
+                actionLabel: AppTranslate.seeAll.tr(),
+                onAction: openReports,
+              ),
+              if (state.isLoading)
+                CustomSkeleton(height: 64.h)
+              else if (state.errorMessage != null)
+                CustomErrorState(
+                  title: AppTranslate.couldNotLoadInvoices.tr(),
+                  message: state.errorMessage,
+                  onRetry: () => ref.invalidate(invoicesProvider),
+                )
+              else
+                _RecentInvoicesList(
+                  invoices: recentInvoices,
+                  onCreateInvoice: openCreateInvoice,
+                  onInvoiceTap: (invoice) {
+                    if (invoice.invoice != null) {
+                      openInvoiceDetails(invoice.invoice!);
+                    }
+                  },
+                ),
             ],
-            _QuickActionsGrid(
-              onNewInvoice: openCreateInvoice,
-              onAddClient: () => openTab(_clientsTabIndex),
-              onAddItem: () => openTab(_itemsTabIndex),
-              onSalesReport: openReports,
-            ),
-            SizedBox(height: AppSpacing.xl.h),
-            CustomSectionHeader(
-              title: 'Recent Invoices',
-              actionLabel: 'See All',
-              onAction: openReports,
-            ),
-            if (state.isLoading)
-              CustomSkeleton(height: 64.h)
-            else if (state.errorMessage != null)
-              CustomErrorState(
-                title: 'Could not load invoices',
-                message: state.errorMessage,
-                onRetry: () => ref.invalidate(invoicesProvider),
-              )
-            else
-              _RecentInvoicesList(
-                invoices: recentInvoices,
-                onCreateInvoice: openCreateInvoice,
-                onInvoiceTap: (invoice) {
-                  if (invoice.invoice != null) {
-                    openInvoiceDetails(invoice.invoice!);
-                  }
-                },
-              ),
-          ],
+          ),
         ),
       ),
     );
@@ -126,12 +134,11 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 class _DashboardHeader extends StatelessWidget {
-  const _DashboardHeader({required this.onNotificationsTap});
-
-  final VoidCallback onNotificationsTap;
-
+  const _DashboardHeader();
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -140,28 +147,20 @@ class _DashboardHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomText(
-                text: 'Good day',
+                text: AppTranslate.goodDay.tr(),
                 style: AppTextStyles.caption,
                 fontWeight: FontWeight.w500,
-                color: AppColors.neutral500,
+                color: palette.textMuted,
               ),
               SizedBox(height: AppSpacing.s3xs.h),
               CustomText(
-                text: 'Billing & Sales',
+                text: AppTranslate.billingAndSales.tr(),
                 style: AppTextStyles.pageTitle,
                 letterSpacing: -0.3,
-                color: AppColors.neutral900,
+                color: palette.textPrimary,
               ),
             ],
           ),
-        ),
-        CustomIconButton(
-          icon: Icons.notifications_outlined,
-          onPressed: onNotificationsTap,
-          size: AppDimensions.headerActionSize,
-          iconSize: AppDimensions.iconMd,
-          shadow: false,
-          tooltip: 'Notifications',
         ),
       ],
     );
@@ -178,15 +177,24 @@ class _SummaryStatsRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: _StatChip(value: '${state.invoiceCount}', label: 'Invoices'),
+          child: _StatChip(
+            value: '${state.invoiceCount}',
+            label: AppTranslate.invoices.tr(),
+          ),
         ),
         SizedBox(width: AppSpacing.cardGap.w),
         Expanded(
-          child: _StatChip(value: '${state.clientCount}', label: 'Clients'),
+          child: _StatChip(
+            value: '${state.clientCount}',
+            label: AppTranslate.clients.tr(),
+          ),
         ),
         SizedBox(width: AppSpacing.cardGap.w),
         Expanded(
-          child: _StatChip(value: '${state.itemCount}', label: 'Items'),
+          child: _StatChip(
+            value: '${state.itemCount}',
+            label: AppTranslate.items.tr(),
+          ),
         ),
       ],
     );
@@ -201,12 +209,14 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg.r),
-        border: Border.all(color: AppColors.neutral200),
+        border: Border.all(color: palette.border),
         boxShadow: AppShadows.xs,
       ),
       child: Column(
@@ -215,13 +225,13 @@ class _StatChip extends StatelessWidget {
           CustomText(
             text: value,
             style: AppTextStyles.amount,
-            color: AppColors.primary,
+            color: palette.accentText,
           ),
           SizedBox(height: AppSpacing.s3xs.h),
           CustomText(
             text: label.toUpperCase(),
             style: AppTextStyles.microLabel,
-            color: AppColors.neutral500,
+            color: palette.textMuted,
           ),
         ],
       ),
@@ -244,6 +254,8 @@ class _QuickActionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       children: [
         Row(
@@ -251,9 +263,9 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _ActionCard(
                 icon: Icons.receipt_long_outlined,
-                title: 'New Invoice',
+                title: AppTranslate.newInvoice.tr(),
                 iconColor: AppColors.coral,
-                iconBackground: AppColors.coralSubtle,
+                iconBackground: palette.coralSubtle,
                 onTap: onNewInvoice,
               ),
             ),
@@ -261,9 +273,9 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _ActionCard(
                 icon: Icons.people_outline,
-                title: 'Add Client',
-                iconColor: AppColors.cyanDark,
-                iconBackground: AppColors.cyanLight,
+                title: AppTranslate.addClient.tr(),
+                iconColor: palette.cyanText,
+                iconBackground: palette.cyanLight,
                 onTap: onAddClient,
               ),
             ),
@@ -275,9 +287,9 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _ActionCard(
                 icon: Icons.inventory_2_outlined,
-                title: 'Add Item',
-                iconColor: AppColors.primary,
-                iconBackground: AppColors.primarySubtle,
+                title: AppTranslate.addItem.tr(),
+                iconColor: palette.accentText,
+                iconBackground: palette.primarySubtle,
                 onTap: onAddItem,
               ),
             ),
@@ -285,9 +297,9 @@ class _QuickActionsGrid extends StatelessWidget {
             Expanded(
               child: _ActionCard(
                 icon: Icons.show_chart,
-                title: 'Sales Report',
-                iconColor: AppColors.purple,
-                iconBackground: AppColors.purpleSubtle,
+                title: AppTranslate.salesReport.tr(),
+                iconColor: palette.purpleText,
+                iconBackground: palette.purpleSubtle,
                 onTap: onSalesReport,
               ),
             ),
@@ -335,7 +347,7 @@ class _ActionCard extends StatelessWidget {
             text: title,
             style: AppTextStyles.label,
             fontWeight: FontWeight.w700,
-            color: AppColors.neutral800,
+            color: context.palette.textPrimary,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -361,10 +373,10 @@ class _RecentInvoicesList extends StatelessWidget {
     if (invoices.isEmpty) {
       return CustomEmptyState(
         icon: Icons.receipt_long_outlined,
-        title: 'No Invoices Yet',
-        message: 'Create your first sales invoice to see it listed here.',
+        title: AppTranslate.noInvoicesYet.tr(),
+        message: AppTranslate.createFirstSalesInvoiceMessage.tr(),
         action: CustomButton(
-          text: '+ Create Invoice',
+          text: AppTranslate.plusCreateInvoice.tr(),
           size: CustomButtonSize.small,
           onPressed: onCreateInvoice,
         ),
@@ -393,6 +405,8 @@ class _RecentInvoiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return CustomCard(
       onTap: onTap,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -403,15 +417,15 @@ class _RecentInvoiceTile extends StatelessWidget {
             height: 35.r,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.primarySubtle,
+              color: palette.primarySubtle,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd.r),
             ),
-            padding: EdgeInsets.only(left: 4.w,right: 4.w),
+            padding: EdgeInsets.only(left: 4.w, right: 4.w),
             child: CustomText(
               text: '#${invoice.billNumber}',
               style: AppTextStyles.label,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: palette.accentText,
             ),
           ),
           SizedBox(width: AppSpacing.cardGap.w),
@@ -423,13 +437,13 @@ class _RecentInvoiceTile extends StatelessWidget {
                   text: invoice.clientName,
                   style: AppTextStyles.label,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.neutral900,
+                  color: palette.textPrimary,
                   maxLines: 1,
                 ),
                 CustomText(
                   text: invoice.billDate,
                   fontSize: AppTextStyles.size2xs,
-                  color: AppColors.neutral500,
+                  color: palette.textMuted,
                 ),
               ],
             ),
@@ -442,11 +456,13 @@ class _RecentInvoiceTile extends StatelessWidget {
                 text: invoice.formattedBillsTotal,
                 style: AppTextStyles.label,
                 fontWeight: FontWeight.w700,
-                color: AppColors.neutral900,
+                color: palette.textPrimary,
               ),
               SizedBox(height: AppSpacing.s2xs.h),
               CustomChip(
-                label: invoice.isPaid ? 'Paid' : 'Unpaid',
+                label: invoice.isPaid
+                    ? AppTranslate.paid.tr()
+                    : AppTranslate.unpaid.tr(),
                 variant: invoice.isPaid
                     ? CustomChipVariant.success
                     : CustomChipVariant.warning,

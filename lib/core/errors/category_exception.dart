@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class CategoryExceptionCodes {
   const CategoryExceptionCodes._();
 
@@ -16,15 +19,15 @@ class CategoryException implements Exception {
   String get message {
     switch (code) {
       case CategoryExceptionCodes.nameRequired:
-        return 'Category Name is Required';
+        return AppTranslate.categoryNameRequired.tr();
       case CategoryExceptionCodes.nameDuplicate:
-        return 'Category Name has already existed before';
+        return AppTranslate.categoryNameAlreadyExists.tr();
       case CategoryExceptionCodes.notFound:
-        return 'This category no longer exists. It may have been deleted already.';
+        return AppTranslate.categoryNotFound.tr();
       case CategoryExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

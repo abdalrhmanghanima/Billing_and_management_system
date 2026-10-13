@@ -1,7 +1,9 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/categories/entities/category.dart';
 import 'package:billing_and_sales_management/features/categories/providers/categories_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +46,7 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
 
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _nameError = 'Category Name is Required');
+      setState(() => _nameError = AppTranslate.categoryNameRequired.tr());
       return;
     }
 
@@ -71,18 +73,20 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         CustomSnackbar.showSuccess(
           context,
           _isEditing
-              ? 'Category updated successfully.'
-              : 'Category saved successfully.',
+              ? AppTranslate.categoryUpdatedSuccessfully.tr()
+              : AppTranslate.categorySavedSuccessfully.tr(),
         );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
-        setState(() => _nameError = 'Category Name has already existed before');
+        setState(
+          () => _nameError = AppTranslate.categoryNameAlreadyExists.tr(),
+        );
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
           _isEditing
-              ? 'Could not update the category. Please try again.'
-              : 'Could not save the category. Please try again.',
+              ? AppTranslate.couldNotUpdateCategory.tr()
+              : AppTranslate.couldNotSaveCategory.tr(),
         );
     }
   }
@@ -95,9 +99,9 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
       children: [
         CustomTextField(
           controller: _nameController,
-          label: 'Category Name',
+          label: AppTranslate.categoryName.tr(),
           isRequired: true,
-          hint: 'Enter category name',
+          hint: AppTranslate.enterCategoryName.tr(),
           errorText: _nameError,
           enabled: !_isSaving,
           textInputAction: TextInputAction.next,
@@ -108,15 +112,17 @@ class _CategoryFormSheetState extends ConsumerState<CategoryFormSheet> {
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: _notesController,
-          label: 'Notes',
-          hint: 'Enter notes (optional)',
+          label: AppTranslate.notes.tr(),
+          hint: AppTranslate.enterNotesOptional.tr(),
           enabled: !_isSaving,
           maxLines: 3,
           minLines: 3,
         ),
         SizedBox(height: AppSpacing.lg.h),
         CustomButton(
-          text: _isEditing ? 'Update Category' : 'Save Category',
+          text: _isEditing
+              ? AppTranslate.updateCategory.tr()
+              : AppTranslate.saveCategory.tr(),
           onPressed: _save,
           loading: _isSaving,
         ),

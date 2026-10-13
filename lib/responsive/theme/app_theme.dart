@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_shadows.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
@@ -27,10 +28,13 @@ class AppTheme {
     final surface = isDark ? AppColors.darkSurface : AppColors.surface;
     final card = isDark ? AppColors.darkCard : AppColors.card;
     final border = isDark ? AppColors.darkBorder : AppColors.border;
-    final subtleBorder = isDark ? AppColors.darkBorder : AppColors.neutral200;
+    final subtleBorder = isDark
+        ? AppColors.darkSubtleBorder
+        : AppColors.neutral200;
     final textPrimary = isDark
         ? AppColors.darkTextPrimary
         : AppColors.textPrimary;
+    final textStrong = isDark ? AppColors.darkTextStrong : AppColors.neutral700;
     final textSecondary = isDark
         ? AppColors.darkTextSecondary
         : AppColors.textSecondary;
@@ -44,45 +48,49 @@ class AppTheme {
           primary: AppColors.primary,
           onPrimary: AppColors.onPrimary,
           primaryContainer: isDark
-              ? AppColors.primaryDark
+              ? AppColors.darkPrimarySubtle
               : AppColors.primarySubtle,
           onPrimaryContainer: isDark
-              ? AppColors.primarySubtle
+              ? AppColors.darkAccentText
               : AppColors.primaryDark,
           secondary: AppColors.cyanBrand,
           onSecondary: AppColors.white,
-          secondaryContainer: isDark ? AppColors.cyanDark : AppColors.cyanLight,
+          secondaryContainer: isDark
+              ? AppColors.darkCyanLight
+              : AppColors.cyanLight,
           onSecondaryContainer: isDark
-              ? AppColors.cyanLight
+              ? AppColors.darkCyanText
               : AppColors.cyanDark,
           tertiary: AppColors.coral,
           onTertiary: AppColors.white,
           tertiaryContainer: isDark
-              ? AppColors.coralHover
+              ? AppColors.darkCoralSubtle
               : AppColors.coralSubtle,
-          onTertiaryContainer: isDark
-              ? AppColors.coralSubtle
-              : AppColors.coralHover,
+          onTertiaryContainer: isDark ? AppColors.coral : AppColors.coralHover,
           error: AppColors.error,
           onError: AppColors.white,
-          errorContainer: AppColors.errorBg,
-          onErrorContainer: AppColors.errorText,
+          errorContainer: isDark ? AppColors.darkErrorBg : AppColors.errorBg,
+          onErrorContainer: isDark
+              ? AppColors.darkErrorText
+              : AppColors.errorText,
           surface: surface,
           onSurface: textPrimary,
           onSurfaceVariant: textSecondary,
           surfaceContainerLowest: isDark
-              ? AppColors.neutral950
+              ? AppColors.darkBackgroundDeep
               : AppColors.white,
-          surfaceContainerLow: isDark ? AppColors.neutral900 : AppColors.white,
+          surfaceContainerLow: isDark ? AppColors.darkSurface : AppColors.white,
           surfaceContainer: isDark ? AppColors.darkCard : AppColors.white,
           surfaceContainerHigh: isDark
-              ? AppColors.neutral700
+              ? AppColors.darkHover
               : AppColors.neutral100,
           surfaceContainerHighest: isDark
-              ? AppColors.neutral600
+              ? AppColors.darkHoverHigh
               : AppColors.neutral100,
           outline: border,
-          outlineVariant: isDark ? AppColors.neutral700 : AppColors.neutral150,
+          outlineVariant: isDark
+              ? AppColors.darkSubtleBorder
+              : AppColors.neutral150,
           shadow: AppColors.black,
           scrim: AppShadows.scrim,
           inverseSurface: isDark ? AppColors.neutral100 : AppColors.neutral900,
@@ -90,7 +98,14 @@ class AppTheme {
           inversePrimary: AppColors.cyanBrand,
         );
 
-    final textTheme = _textTheme(textPrimary, textSecondary, textMuted);
+    final textTheme = _textTheme(
+      textPrimary,
+      textStrong,
+      textSecondary,
+      textMuted,
+    );
+
+    final appBarTheme = _appBarTheme(textPrimary, background, isDark);
 
     return ThemeData(
       useMaterial3: true,
@@ -106,25 +121,27 @@ class AppTheme {
       highlightColor: Colors.transparent,
       focusColor: Colors.transparent,
       dividerColor: border,
-      appBarTheme: _appBarTheme(textPrimary, background),
+      extensions: [isDark ? AppPalette.dark : AppPalette.light],
+      appBarTheme: appBarTheme,
       cardTheme: _cardTheme(card, border),
-      dialogTheme: _dialogTheme(surface, textPrimary, textSecondary),
+      dialogTheme: _dialogTheme(card, textPrimary, textSecondary),
       bottomSheetTheme: _bottomSheetTheme(surface),
       inputDecorationTheme: _inputDecoration(
         isDark: isDark,
         subtleBorder: subtleBorder,
         textMuted: textMuted,
         textSecondary: textSecondary,
+        errorText: isDark ? AppColors.darkErrorText : AppColors.errorText,
       ),
       filledButtonTheme: FilledButtonThemeData(style: _filledButtonStyle()),
       elevatedButtonTheme: ElevatedButtonThemeData(style: _filledButtonStyle()),
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: _outlineButtonStyle(),
+        style: _outlineButtonStyle(isDark),
       ),
-      textButtonTheme: TextButtonThemeData(style: _textButtonStyle()),
-      navigationBarTheme: _navigationBarTheme(surface, textMuted),
+      textButtonTheme: TextButtonThemeData(style: _textButtonStyle(isDark)),
+      navigationBarTheme: _navigationBarTheme(surface, textMuted, isDark),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.neutral900,
+        backgroundColor: isDark ? AppColors.darkHover : AppColors.neutral900,
         contentTextStyle: AppTextStyles.bodySmall.copyWith(
           color: AppColors.white,
           fontWeight: FontWeight.w500,
@@ -146,7 +163,9 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: isDark ? AppColors.darkCard : AppColors.white,
-        selectedColor: AppColors.primarySubtle,
+        selectedColor: isDark
+            ? AppColors.darkPrimarySubtle
+            : AppColors.primarySubtle,
         labelStyle: AppTextStyles.bodySmall.copyWith(color: textPrimary),
         side: BorderSide(color: subtleBorder),
         shape: RoundedRectangleBorder(
@@ -155,9 +174,9 @@ class AppTheme {
       ),
       dividerTheme: DividerThemeData(color: border, thickness: 1, space: 1),
       progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: AppColors.primary,
-        linearTrackColor: AppColors.neutral100,
-        circularTrackColor: AppColors.neutral100,
+        color: isDark ? AppColors.darkAccentText : AppColors.primary,
+        linearTrackColor: isDark ? AppColors.darkHover : AppColors.neutral100,
+        circularTrackColor: isDark ? AppColors.darkHover : AppColors.neutral100,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
@@ -179,20 +198,21 @@ class AppTheme {
 
   static TextTheme _textTheme(
     Color textPrimary,
+    Color textStrong,
     Color textSecondary,
     Color textMuted,
   ) {
     return TextTheme(
-      displayLarge: AppTextStyles.display.copyWith(color: textPrimary),
-      displayMedium: AppTextStyles.amountLarge.copyWith(color: textPrimary),
-      displaySmall: AppTextStyles.headline.copyWith(color: textPrimary),
-      headlineLarge: AppTextStyles.title.copyWith(color: textPrimary),
+      displayLarge: AppTextStyles.display.copyWith(color: textStrong),
+      displayMedium: AppTextStyles.amountLarge.copyWith(color: textStrong),
+      displaySmall: AppTextStyles.headline.copyWith(color: textStrong),
+      headlineLarge: AppTextStyles.title.copyWith(color: textStrong),
       headlineMedium: AppTextStyles.title.copyWith(
         fontWeight: FontWeight.w700,
-        color: textPrimary,
+        color: textStrong,
       ),
-      headlineSmall: AppTextStyles.subtitle.copyWith(color: textPrimary),
-      titleLarge: AppTextStyles.subtitle.copyWith(color: textPrimary),
+      headlineSmall: AppTextStyles.subtitle.copyWith(color: textStrong),
+      titleLarge: AppTextStyles.subtitle.copyWith(color: textStrong),
       titleMedium: AppTextStyles.sectionTitle.copyWith(color: textPrimary),
       titleSmall: AppTextStyles.cardTitle.copyWith(color: textPrimary),
       bodyLarge: AppTextStyles.body.copyWith(
@@ -211,7 +231,11 @@ class AppTheme {
   // Component themes
   // ---------------------------------------------------------------------------
 
-  static AppBarTheme _appBarTheme(Color textPrimary, Color background) {
+  static AppBarTheme _appBarTheme(
+    Color textPrimary,
+    Color background,
+    bool isDark,
+  ) {
     return AppBarTheme(
       backgroundColor: background,
       surfaceTintColor: Colors.transparent,
@@ -221,8 +245,12 @@ class AppTheme {
       centerTitle: true,
       toolbarHeight: AppDimensions.appBarHeight,
       titleTextStyle: AppTextStyles.appBarTitle.copyWith(color: textPrimary),
-      iconTheme: IconThemeData(color: AppColors.neutral700),
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      iconTheme: IconThemeData(
+        color: isDark ? AppColors.darkTextSecondary : AppColors.neutral700,
+      ),
+      systemOverlayStyle: isDark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
     );
   }
 
@@ -277,10 +305,11 @@ class AppTheme {
     required Color subtleBorder,
     required Color textMuted,
     required Color textSecondary,
+    required Color errorText,
   }) {
     return InputDecorationTheme(
       filled: true,
-      fillColor: isDark ? AppColors.darkCard : AppColors.white,
+      fillColor: isDark ? AppColors.darkInset : AppColors.white,
       isDense: false,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.inputHorizontalPadding,
@@ -289,16 +318,19 @@ class AppTheme {
       hintStyle: AppTextStyles.body.copyWith(color: textMuted),
       labelStyle: AppTextStyles.label.copyWith(color: textSecondary),
       floatingLabelStyle: AppTextStyles.label.copyWith(
-        color: AppColors.primary,
+        color: isDark ? AppColors.darkAccentText : AppColors.primary,
       ),
-      errorStyle: AppTextStyles.fieldError.copyWith(color: AppColors.errorText),
+      errorStyle: AppTextStyles.fieldError.copyWith(color: errorText),
       helperStyle: AppTextStyles.caption.copyWith(color: textMuted),
-      prefixIconColor: AppColors.neutral400,
-      suffixIconColor: AppColors.neutral400,
+      prefixIconColor: isDark ? AppColors.darkTextMuted : AppColors.neutral400,
+      suffixIconColor: isDark ? AppColors.darkTextMuted : AppColors.neutral400,
       errorMaxLines: 2,
       border: _inputBorder(subtleBorder, width: 1.5),
       enabledBorder: _inputBorder(subtleBorder, width: 1.5),
-      focusedBorder: _inputBorder(AppColors.primary, width: 1.5),
+      focusedBorder: _inputBorder(
+        isDark ? AppColors.darkAccentText : AppColors.primary,
+        width: 1.5,
+      ),
       errorBorder: _inputBorder(AppColors.error, width: 1.5),
       focusedErrorBorder: _inputBorder(AppColors.error, width: 1.5),
       disabledBorder: _inputBorder(subtleBorder, width: 1.5),
@@ -333,26 +365,28 @@ class AppTheme {
     );
   }
 
-  static ButtonStyle _outlineButtonStyle() {
+  static ButtonStyle _outlineButtonStyle(bool isDark) {
+    final accent = isDark ? AppColors.darkAccentText : AppColors.primary;
+
     return _filledButtonStyle().copyWith(
       backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
-      foregroundColor: const WidgetStatePropertyAll(AppColors.primary),
-      side: const WidgetStatePropertyAll(
-        BorderSide(color: AppColors.primary, width: 1.5),
-      ),
+      foregroundColor: WidgetStatePropertyAll(accent),
+      side: WidgetStatePropertyAll(BorderSide(color: accent, width: 1.5)),
       textStyle: WidgetStatePropertyAll(
-        AppTextStyles.button.copyWith(color: AppColors.primary),
+        AppTextStyles.button.copyWith(color: accent),
       ),
     );
   }
 
-  static ButtonStyle _textButtonStyle() {
+  static ButtonStyle _textButtonStyle(bool isDark) {
+    final accent = isDark ? AppColors.darkAccentText : AppColors.primary;
+
     return _filledButtonStyle().copyWith(
       backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
-      foregroundColor: const WidgetStatePropertyAll(AppColors.primary),
+      foregroundColor: WidgetStatePropertyAll(accent),
       minimumSize: const WidgetStatePropertyAll(Size(0, 40)),
       textStyle: WidgetStatePropertyAll(
-        AppTextStyles.button.copyWith(color: AppColors.primary),
+        AppTextStyles.button.copyWith(color: accent),
       ),
     );
   }
@@ -360,13 +394,16 @@ class AppTheme {
   static NavigationBarThemeData _navigationBarTheme(
     Color surface,
     Color textMuted,
+    bool isDark,
   ) {
     return NavigationBarThemeData(
       backgroundColor: surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       height: AppDimensions.bottomNavHeight,
-      indicatorColor: AppColors.primarySubtle,
+      indicatorColor: isDark
+          ? AppColors.darkPrimarySubtle
+          : AppColors.primarySubtle,
       labelTextStyle: WidgetStatePropertyAll(
         AppTextStyles.navLabel.copyWith(color: textMuted),
       ),

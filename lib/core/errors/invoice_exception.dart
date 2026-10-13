@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class InvoiceExceptionCodes {
   const InvoiceExceptionCodes._();
 
@@ -25,33 +28,33 @@ class InvoiceException implements Exception {
   String get message {
     switch (code) {
       case InvoiceExceptionCodes.billDateRequired:
-        return 'BILL DATE is Required';
+        return AppTranslate.billDateRequired.tr();
       case InvoiceExceptionCodes.clientRequired:
-        return 'CLIENT NAME is Required';
+        return AppTranslate.clientNameRequired.tr();
       case InvoiceExceptionCodes.itemsEmpty:
-        return 'No Items Added';
+        return AppTranslate.noItemsAdded.tr();
       case InvoiceExceptionCodes.itemNameRequired:
-        return 'ITEM NAME is Required';
+        return AppTranslate.itemNameRequired.tr();
       case InvoiceExceptionCodes.quantityRequired:
-        return 'Quantity is Required';
+        return AppTranslate.quantityRequired.tr();
       case InvoiceExceptionCodes.quantityGreaterThanZero:
-        return 'Quantity Must be Greater than Zero';
+        return AppTranslate.quantityGreaterThanZero.tr();
       case InvoiceExceptionCodes.sellingPriceRequired:
-        return 'Selling Price is Required';
+        return AppTranslate.sellingPriceRequired.tr();
       case InvoiceExceptionCodes.sellingPriceInvalid:
-        return 'SELLING PRICE Must be Greater than or equal Zero';
+        return AppTranslate.sellingPriceInvalid.tr();
       case InvoiceExceptionCodes.discountInvalid:
-        return 'Discount Must be Greater than or equal Zero';
+        return AppTranslate.discountInvalid.tr();
       case InvoiceExceptionCodes.percentageDiscountInvalid:
-        return 'Percentage discount Must be Greater than or equal Zero';
+        return AppTranslate.percentageDiscountInvalid.tr();
       case InvoiceExceptionCodes.valueDiscountInvalid:
-        return 'Value discount Must be Greater than or equal Zero';
+        return AppTranslate.valueDiscountInvalid.tr();
       case InvoiceExceptionCodes.paidUpInvalid:
-        return 'Paid Up Must be Greater than or equal Zero';
+        return AppTranslate.paidUpInvalid.tr();
       case InvoiceExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

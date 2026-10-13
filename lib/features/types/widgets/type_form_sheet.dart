@@ -1,9 +1,11 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
 import 'package:billing_and_sales_management/domain/types/entities/item_type.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,8 +53,10 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
 
     if (company == null || name.isEmpty) {
       setState(() {
-        _companyError = company == null ? 'COMPANY NAME is Required' : null;
-        _nameError = name.isEmpty ? 'TYPE NAME is Required' : null;
+        _companyError = company == null
+            ? AppTranslate.companyNameRequired.tr()
+            : null;
+        _nameError = name.isEmpty ? AppTranslate.typeNameRequired.tr() : null;
       });
       return;
     }
@@ -88,18 +92,18 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
         CustomSnackbar.showSuccess(
           context,
           _isEditing
-              ? 'Type updated successfully.'
-              : 'Type saved successfully.',
+              ? AppTranslate.typeUpdatedSuccessfully.tr()
+              : AppTranslate.typeSavedSuccessfully.tr(),
         );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
-        setState(() => _nameError = 'TYPE NAME has already existed before');
+        setState(() => _nameError = AppTranslate.typeNameAlreadyExists.tr());
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
           _isEditing
-              ? 'Could not update the type. Please try again.'
-              : 'Could not save the type. Please try again.',
+              ? AppTranslate.couldNotUpdateType.tr()
+              : AppTranslate.couldNotSaveType.tr(),
         );
     }
   }
@@ -109,26 +113,25 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
     final companiesState = ref.watch(companiesProvider);
 
     return companiesState.when(
-      loading: () => const SizedBox(
+      loading: () => SizedBox(
         height: 160,
-        child: Center(child: CustomLoading(color: AppColors.primary)),
+        child: Center(child: CustomLoading(color: context.palette.accentText)),
       ),
       error: (error, _) => SizedBox(
         height: 160,
         child: CustomErrorState(
-          title: 'Could not load companies',
+          title: AppTranslate.couldNotLoadCompanies.tr(),
           onRetry: () => ref.read(companiesProvider.notifier).refresh(),
         ),
       ),
       data: (companies) {
         if (companies.isEmpty) {
-          return const CustomEmptyState(
+          return CustomEmptyState(
             icon: Icons.business_outlined,
-            iconColor: AppColors.cyanDark,
-            iconBackgroundColor: AppColors.cyanLight,
-            title: 'No Companies Available',
-            message:
-                'Add a company first before creating types. Types must belong to a company.',
+            iconColor: context.palette.cyanText,
+            iconBackgroundColor: context.palette.cyanLight,
+            title: AppTranslate.noCompaniesAvailable.tr(),
+            message: AppTranslate.addCompanyFirstBeforeTypesMessage.tr(),
           );
         }
 
@@ -149,9 +152,9 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         CustomDropdown<Company>(
-          label: 'Company Name',
+          label: AppTranslate.companyName.tr(),
           isRequired: true,
-          hint: 'Select company',
+          hint: AppTranslate.selectCompany.tr(),
           options: companies,
           value: _selectedCompany,
           labelOf: (company) => company.name,
@@ -179,9 +182,9 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: _nameController,
-          label: 'Type Name',
+          label: AppTranslate.typeName.tr(),
           isRequired: true,
-          hint: 'Enter type name',
+          hint: AppTranslate.enterTypeName.tr(),
           errorText: _nameError,
           enabled: !_isSaving,
           textInputAction: TextInputAction.next,
@@ -192,15 +195,17 @@ class _TypeFormSheetState extends ConsumerState<TypeFormSheet> {
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: _notesController,
-          label: 'Notes',
-          hint: 'Enter notes (optional)',
+          label: AppTranslate.notes.tr(),
+          hint: AppTranslate.enterNotesOptional.tr(),
           enabled: !_isSaving,
           maxLines: 3,
           minLines: 3,
         ),
         SizedBox(height: AppSpacing.lg.h),
         CustomButton(
-          text: _isEditing ? 'Update Type' : 'Save Type',
+          text: _isEditing
+              ? AppTranslate.updateType.tr()
+              : AppTranslate.saveType.tr(),
           onPressed: _save,
           loading: _isSaving,
         ),

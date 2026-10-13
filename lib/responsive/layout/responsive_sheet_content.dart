@@ -2,8 +2,8 @@
 import 'package:billing_and_sales_management/responsive/core/breakpoints.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_context.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 
 /// Wraps bottom-sheet content so it reproduces the design's mobile sheet
 /// (`.bottom-sheet-content`):
@@ -57,7 +57,7 @@ class ResponsiveSheetContent extends StatelessWidget {
                     width: 40.r,
                     height: 4.r,
                     decoration: BoxDecoration(
-                      color: AppColors.neutral300,
+                      color: context.palette.handleColor,
                       borderRadius: BorderRadius.circular(
                         AppDimensions.radiusFull,
                       ),

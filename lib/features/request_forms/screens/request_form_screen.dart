@@ -1,7 +1,9 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/features/request_forms/providers/request_forms_notifier.dart';
 import 'package:billing_and_sales_management/features/request_forms/widgets/request_form_fields.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -130,13 +132,17 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
         _minutesOf(_endTime) <= _minutesOf(_startTime);
 
     setState(() {
-      _employeeNameError = nameInvalid ? 'Employee NAME is Required' : null;
-      _dateError = dateInvalid ? 'DATE is Required' : null;
-      _startTimeError = startTimeInvalid ? 'Start Time is Required' : null;
+      _employeeNameError = nameInvalid
+          ? AppTranslate.employeeNameRequired.tr()
+          : null;
+      _dateError = dateInvalid ? AppTranslate.dateRequired.tr() : null;
+      _startTimeError = startTimeInvalid
+          ? AppTranslate.startTimeRequired.tr()
+          : null;
       _endTimeError = endTimeInvalid
-          ? 'End Time is Required'
+          ? AppTranslate.endTimeRequired.tr()
           : endTimeNotAfterStartTime
-          ? 'End Time must be greater than Start Time'
+          ? AppTranslate.endTimeMustBeAfterStartTime.tr()
           : null;
     });
 
@@ -165,13 +171,16 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
 
     switch (result) {
       case SaveResult.success:
-        CustomSnackbar.showSuccess(context, 'Request submitted successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          AppTranslate.requestSubmittedSuccessfully.tr(),
+        );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not submit the request. Please try again.',
+          AppTranslate.couldNotSubmitRequest.tr(),
         );
     }
   }
@@ -179,8 +188,7 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: 'Request a Form'),
+      appBar: CustomAppBar(title: AppTranslate.requestAForm.tr()),
       body: SafeArea(
         top: false,
         child: MaxWidthBox(
@@ -220,7 +228,7 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
                   horizontal: AppSpacing.pageHorizontal.w,
                 ),
                 child: CustomButton(
-                  text: 'Submit Request',
+                  text: AppTranslate.submitRequest.tr(),
                   onPressed: _isSaving ? null : _submit,
                   loading: _isSaving,
                 ),

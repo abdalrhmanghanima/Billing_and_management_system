@@ -6,6 +6,7 @@ import 'package:billing_and_sales_management/responsive/core/responsive_extensio
 import 'package:billing_and_sales_management/responsive/navigation/responsive_navigation.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_shadows.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
@@ -65,9 +66,10 @@ class ResponsiveBottomNav extends StatelessWidget {
     if (items.isEmpty && centerAction == null) return const SizedBox.shrink();
 
     final index = items.isEmpty ? 0 : selectedIndex.clamp(0, items.length - 1);
-    final activeColor = indicatorColor ?? AppColors.primary;
-    final inactiveColor = AppColors.neutral400;
-    final surface = backgroundColor ?? AppColors.surface;
+    final palette = context.palette;
+    final activeColor = indicatorColor ?? palette.accentText;
+    final inactiveColor = palette.iconMuted;
+    final surface = backgroundColor ?? palette.surface;
 
     final pillHeight = _pillHeight.h;
     final bottomInset = max(
@@ -82,12 +84,12 @@ class ResponsiveBottomNav extends StatelessWidget {
     final iconLabelGap = AppSpacing.s2xs.h;
     final labelHeight =
         AppTextStyles.size2xs *
-            1.2 *
-            MediaQuery.textScalerOf(context).scale(1.0);
+        1.2 *
+        MediaQuery.textScalerOf(context).scale(1.0);
     final tabLabelTop =
         (pillHeight - (iconSize + iconLabelGap + labelHeight)) / 2 +
-            iconSize +
-            iconLabelGap;
+        iconSize +
+        iconLabelGap;
     final fabLabelGap = max(tabLabelTop - fabRadius, AppSpacing.xs.h);
 
     return LayoutBuilder(
@@ -109,12 +111,12 @@ class ResponsiveBottomNav extends StatelessWidget {
         final centerSlotWidth = centerAction == null
             ? 0.0
             : min(
-          max(
-            rowWidth * _centerSlotRatio,
-            2 * fabRadius + AppSpacing.lg.r,
-          ),
-          rowWidth,
-        );
+                max(
+                  rowWidth * _centerSlotRatio,
+                  2 * fabRadius + AppSpacing.lg.r,
+                ),
+                rowWidth,
+              );
         final sideWidth = max((rowWidth - centerSlotWidth) / 2, 0.0);
         final leftCount = items.length ~/ 2;
         final rightCount = items.length - leftCount;
@@ -160,7 +162,7 @@ class ResponsiveBottomNav extends StatelessWidget {
                 child: CustomPaint(
                   painter: _FloatingNavPillPainter(
                     surface: surface,
-                    shadowColor: AppColors.neutral900.withValues(alpha: 0.08),
+                    shadowColor: palette.navShadowColor,
                     shadowOffset: AppSpacing.s3xs.r,
                     shadowBlur: AppDimensions.radiusMd.r,
                     cornerRadius: cornerRadius,
@@ -242,10 +244,10 @@ class _NavTab extends StatelessWidget {
                     item.label,
                     maxLines: 1,
                     style:
-                    (selected
-                        ? AppTextStyles.navLabelActive
-                        : AppTextStyles.navLabel)
-                        .copyWith(color: color),
+                        (selected
+                                ? AppTextStyles.navLabelActive
+                                : AppTextStyles.navLabel)
+                            .copyWith(color: color),
                   ),
                 ),
               ),
@@ -273,6 +275,8 @@ class _CenterActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = AppDimensions.centerFabSize.r;
+    final palette = context.palette;
+    final ringColor = palette.surface;
 
     return InkWell(
       onTap: onTap,
@@ -285,7 +289,7 @@ class _CenterActionButton extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.primary,
-              border: Border.all(color: AppColors.white, width: 3.r),
+              border: Border.all(color: ringColor, width: 3.r),
               boxShadow: AppShadows.fab,
             ),
             child: Icon(
@@ -300,7 +304,7 @@ class _CenterActionButton extends StatelessWidget {
               item.label,
               maxLines: 1,
               style: AppTextStyles.navLabelActive.copyWith(
-                color: AppColors.primary,
+                color: palette.accentText,
               ),
             ),
           ],

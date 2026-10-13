@@ -1,7 +1,9 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/invoice_line.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
 import 'package:billing_and_sales_management/features/dashboard/models/dashboard_state.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class InvoiceDetailsScreen extends StatelessWidget {
@@ -24,22 +26,15 @@ class InvoiceDetailsScreen extends StatelessWidget {
         .toUpperCase();
   }
 
-  static String _formatPercentage(double value) {
-    if (value == value.truncateToDouble()) {
-      return value.toInt().toString();
-    }
-    return value.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
     final isPaid = invoice.isPaid;
+    final palette = context.palette;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Invoice Details',
-        subtitle: 'View Receipt',
+      appBar: CustomAppBar(
+        title: AppTranslate.invoiceDetails.tr(),
+        subtitle: AppTranslate.viewReceipt.tr(),
       ),
       body: MaxWidthBox(
         maxWidth: AppDimensions.maxContentWidth,
@@ -62,21 +57,27 @@ class InvoiceDetailsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomText(
-                              text: 'Invoice #${invoice.billNumber}',
+                              text: AppTranslate.invoiceNumber.tr(
+                                namedArgs: {
+                                  'number': invoice.billNumber.toString(),
+                                },
+                              ),
                               style: AppTextStyles.pageTitle,
-                              color: AppColors.neutral900,
+                              color: palette.textPrimary,
                             ),
                             SizedBox(height: AppSpacing.s2xs.h),
                             CustomText(
                               text: invoice.billDate,
                               style: AppTextStyles.metaText,
-                              color: AppColors.neutral500,
+                              color: palette.textMuted,
                             ),
                           ],
                         ),
                       ),
                       CustomChip(
-                        label: invoice.status,
+                        label: invoice.isPaid
+                            ? AppTranslate.paid.tr()
+                            : AppTranslate.unpaid.tr(),
                         variant: isPaid
                             ? CustomChipVariant.success
                             : CustomChipVariant.warning,
@@ -91,7 +92,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
                       vertical: 10.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.neutral50,
+                      color: palette.insetSurface,
                       borderRadius: BorderRadius.circular(
                         AppDimensions.radiusMd.r,
                       ),
@@ -103,7 +104,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
                           height: 38.r,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: AppColors.primarySubtle,
+                            color: palette.primarySubtle,
                             borderRadius: BorderRadius.circular(
                               AppDimensions.avatarRadius.r,
                             ),
@@ -112,7 +113,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
                             text: _initialsOf(invoice.clientName),
                             style: AppTextStyles.label,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: palette.accentText,
                           ),
                         ),
                         SizedBox(width: AppSpacing.md.w),
@@ -123,14 +124,14 @@ class InvoiceDetailsScreen extends StatelessWidget {
                               CustomText(
                                 text: invoice.clientName,
                                 style: AppTextStyles.bodyStrong,
-                                color: AppColors.neutral900,
+                                color: palette.textPrimary,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               CustomText(
-                                text: 'Client Account',
+                                text: AppTranslate.clientAccount.tr(),
                                 style: AppTextStyles.microLabel,
-                                color: AppColors.neutral500,
+                                color: palette.textMuted,
                               ),
                             ],
                           ),
@@ -140,10 +141,12 @@ class InvoiceDetailsScreen extends StatelessWidget {
                   ),
                   SizedBox(height: AppSpacing.md.h),
                   CustomText(
-                    text: 'Items (${invoice.lines.length})',
+                    text: AppTranslate.itemsCount.tr(
+                      namedArgs: {'count': invoice.lines.length.toString()},
+                    ),
                     style: AppTextStyles.label,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.neutral800,
+                    color: palette.textPrimary,
                   ),
                   SizedBox(height: AppSpacing.sm.h),
                   for (final line in invoice.lines) ...[
@@ -153,15 +156,13 @@ class InvoiceDetailsScreen extends StatelessWidget {
                   SizedBox(height: AppSpacing.s2xs.h),
                   Container(
                     padding: EdgeInsets.only(top: AppSpacing.md.h),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: AppColors.neutral200),
-                      ),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: palette.border)),
                     ),
                     child: Column(
                       children: [
                         _TotalsRow(
-                          label: 'Bills Total',
+                          label: AppTranslate.billsTotal.tr(),
                           value: DashboardAmountFormatter.format(
                             invoice.billsTotal,
                           ),
@@ -169,7 +170,12 @@ class InvoiceDetailsScreen extends StatelessWidget {
                         if (invoice.percentageDiscount > 0) ...[
                           SizedBox(height: AppSpacing.s2xs.h),
                           _TotalsRow(
-                            label: 'Discount (${invoice.percentageDiscount}%)',
+                            label: AppTranslate.discountPercentage.tr(
+                              namedArgs: {
+                                'percentage': invoice.percentageDiscount
+                                    .toString(),
+                              },
+                            ),
                             value:
                                 '-${DashboardAmountFormatter.format((invoice.billsTotal * invoice.percentageDiscount) / 100)}',
                           ),
@@ -177,14 +183,14 @@ class InvoiceDetailsScreen extends StatelessWidget {
                         if (invoice.valueDiscount > 0) ...[
                           SizedBox(height: AppSpacing.s2xs.h),
                           _TotalsRow(
-                            label: 'Value Discount',
+                            label: AppTranslate.valueDiscount.tr(),
                             value:
                                 '-${DashboardAmountFormatter.format(invoice.valueDiscount)}',
                           ),
                         ],
                         SizedBox(height: AppSpacing.s2xs.h),
                         _TotalsRow(
-                          label: 'The Net',
+                          label: AppTranslate.theNet.tr(),
                           value: DashboardAmountFormatter.format(
                             invoice.theNet,
                           ),
@@ -192,7 +198,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
                         ),
                         SizedBox(height: AppSpacing.s2xs.h),
                         _TotalsRow(
-                          label: 'Paid Up',
+                          label: AppTranslate.paidUp.tr(),
                           value: DashboardAmountFormatter.format(
                             invoice.paidUp,
                           ),
@@ -204,7 +210,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
                             vertical: 8.h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.coralSubtle,
+                            color: palette.coralSubtle,
                             borderRadius: BorderRadius.circular(
                               AppDimensions.radiusMd.r,
                             ),
@@ -213,7 +219,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: CustomText(
-                                  text: 'The Rest',
+                                  text: AppTranslate.theRest.tr(),
                                   style: AppTextStyles.label,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.coral,
@@ -238,7 +244,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.lg.h),
             CustomButton(
-              text: 'Back to Invoices',
+              text: AppTranslate.backToInvoices.tr(),
               onPressed: () => Navigator.of(context).maybePop(),
             ),
           ],
@@ -262,12 +268,12 @@ class _InvoiceLineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Container(
       padding: EdgeInsets.only(bottom: AppSpacing.sm.h),
-      decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: AppColors.neutral200, width: 1),
-        ),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.border, width: 1)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,13 +286,13 @@ class _InvoiceLineRow extends StatelessWidget {
                   text: line.itemName,
                   style: AppTextStyles.label,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.neutral800,
+                  color: palette.textPrimary,
                 ),
                 CustomText(
                   text:
                       '${_formatQuantity(line.quantity)} × ${DashboardAmountFormatter.format(line.sellingPrice)}',
                   style: AppTextStyles.metaText,
-                  color: AppColors.neutral500,
+                  color: palette.textMuted,
                 ),
               ],
             ),
@@ -296,7 +302,7 @@ class _InvoiceLineRow extends StatelessWidget {
             text: DashboardAmountFormatter.format(line.total),
             style: AppTextStyles.label,
             fontWeight: FontWeight.w700,
-            color: AppColors.neutral900,
+            color: palette.textPrimary,
           ),
         ],
       ),
@@ -317,6 +323,8 @@ class _TotalsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Row(
       children: [
         Expanded(
@@ -325,7 +333,7 @@ class _TotalsRow extends StatelessWidget {
             style: emphasized
                 ? AppTextStyles.sectionTitle
                 : AppTextStyles.bodySmall,
-            color: emphasized ? AppColors.primary : AppColors.neutral600,
+            color: emphasized ? palette.accentText : palette.textSecondary,
           ),
         ),
         CustomText(
@@ -334,7 +342,7 @@ class _TotalsRow extends StatelessWidget {
               ? AppTextStyles.sectionTitle
               : AppTextStyles.bodySmall,
           fontWeight: emphasized ? FontWeight.w700 : FontWeight.w400,
-          color: emphasized ? AppColors.primary : AppColors.neutral600,
+          color: emphasized ? palette.accentText : palette.textSecondary,
         ),
       ],
     );

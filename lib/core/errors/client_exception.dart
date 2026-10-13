@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class ClientExceptionCodes {
   const ClientExceptionCodes._();
 
@@ -19,21 +22,21 @@ class ClientException implements Exception {
   String get message {
     switch (code) {
       case ClientExceptionCodes.nameRequired:
-        return 'CLIENT NAME is Required';
+        return AppTranslate.clientNameRequired.tr();
       case ClientExceptionCodes.nameDuplicate:
-        return 'CLIENT NAME has already existed before';
+        return AppTranslate.clientNameAlreadyExists.tr();
       case ClientExceptionCodes.phoneRequired:
-        return 'PHONE is Required';
+        return AppTranslate.phoneRequired.tr();
       case ClientExceptionCodes.phoneInvalid:
-        return 'PHONE must be just a 11 digit number';
+        return AppTranslate.phoneInvalid.tr();
       case ClientExceptionCodes.addressRequired:
-        return 'Address is Required';
+        return AppTranslate.addressRequired.tr();
       case ClientExceptionCodes.notFound:
-        return 'This client no longer exists. It may have been deleted already.';
+        return AppTranslate.clientNotFound.tr();
       case ClientExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

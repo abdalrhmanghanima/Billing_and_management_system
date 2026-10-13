@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_shadows.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
@@ -96,37 +97,37 @@ class _CustomButtonState extends State<CustomButton> {
   bool get _interactive =>
       widget.enabled && widget.onPressed != null && !widget.loading;
 
-  _ButtonColors _colors() {
+  _ButtonColors _colors(BuildContext context) {
+    final palette = context.palette;
     final disabled = !_interactive;
 
     switch (widget.variant) {
       case CustomButtonVariant.primary:
         return _ButtonColors(
           background: disabled
-              ? AppColors.disabled
+              ? palette.disabled
               : (widget.backgroundColor ?? AppColors.primary),
-          foreground: disabled ? AppColors.textMuted : AppColors.white,
+          foreground: disabled ? palette.textMuted : AppColors.white,
           border: widget.border,
           shadow: disabled ? AppShadows.xs : AppShadows.primaryButton,
         );
       case CustomButtonVariant.secondary:
         return _ButtonColors(
           background: disabled
-              ? AppColors.disabled
-              : (widget.backgroundColor ?? AppColors.neutral100),
+              ? palette.disabled
+              : (widget.backgroundColor ?? palette.subtleSurface),
           foreground: disabled
-              ? AppColors.textMuted
-              : (widget.foregroundColor ?? AppColors.neutral700),
-          border:
-              widget.border ?? const BorderSide(color: AppColors.neutral200),
+              ? palette.textMuted
+              : (widget.foregroundColor ?? palette.textStrong),
+          border: widget.border ?? BorderSide(color: palette.border),
           shadow: AppShadows.xs,
         );
       case CustomButtonVariant.coral:
         return _ButtonColors(
           background: disabled
-              ? AppColors.disabled
+              ? palette.disabled
               : (widget.backgroundColor ?? AppColors.coral),
-          foreground: disabled ? AppColors.textMuted : AppColors.white,
+          foreground: disabled ? palette.textMuted : AppColors.white,
           border: widget.border,
           shadow: disabled ? AppShadows.xs : AppShadows.coralButton,
         );
@@ -134,19 +135,19 @@ class _CustomButtonState extends State<CustomButton> {
         return _ButtonColors(
           background: Colors.transparent,
           foreground: disabled
-              ? AppColors.textMuted
-              : (widget.foregroundColor ?? AppColors.primary),
+              ? palette.textMuted
+              : (widget.foregroundColor ?? palette.accentText),
           border:
               widget.border ??
-              const BorderSide(color: AppColors.primary, width: 1.5),
+              BorderSide(color: palette.accentText, width: 1.5),
           shadow: const [],
         );
       case CustomButtonVariant.text:
         return _ButtonColors(
           background: Colors.transparent,
           foreground: disabled
-              ? AppColors.textMuted
-              : (widget.foregroundColor ?? AppColors.primary),
+              ? palette.textMuted
+              : (widget.foregroundColor ?? palette.accentText),
           border: null,
           shadow: const [],
         );
@@ -156,7 +157,7 @@ class _CustomButtonState extends State<CustomButton> {
   @override
   Widget build(BuildContext context) {
     final isSmall = widget.size == CustomButtonSize.small;
-    final colors = _colors();
+    final colors = _colors(context);
     final radius =
         (widget.borderRadius ??
                 (isSmall ? AppDimensions.radiusMd : AppDimensions.buttonRadius))

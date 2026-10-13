@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_card.dart';
@@ -49,26 +49,24 @@ class CustomEntityTile extends StatelessWidget {
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
 
-  ({Color background, Color foreground}) _tone() {
+  ({Color background, Color foreground}) _tone(AppPalette palette) {
     switch (avatarTone) {
       case EntityAvatarTone.coral:
-        return (background: AppColors.coralSubtle, foreground: AppColors.coral);
+        return (background: palette.coralSubtle, foreground: palette.coralText);
       case EntityAvatarTone.cyan:
-        return (
-          background: AppColors.cyanLight,
-          foreground: AppColors.cyanDark,
-        );
+        return (background: palette.cyanLight, foreground: palette.cyanText);
       case EntityAvatarTone.primary:
         return (
-          background: AppColors.primarySubtle,
-          foreground: AppColors.primary,
+          background: palette.primarySubtle,
+          foreground: palette.accentText,
         );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final tone = _tone();
+    final palette = context.palette;
+    final tone = _tone(palette);
 
     return CustomCard(
       onTap: onTap,
@@ -105,7 +103,7 @@ class CustomEntityTile extends StatelessWidget {
                 CustomText(
                   text: title,
                   style: AppTextStyles.cardTitle,
-                  color: AppColors.neutral900,
+                  color: palette.textPrimary,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -114,7 +112,7 @@ class CustomEntityTile extends StatelessWidget {
                   CustomText(
                     text: subtitle!,
                     style: AppTextStyles.metaText,
-                    color: AppColors.neutral500,
+                    color: palette.textMuted,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -127,7 +125,7 @@ class CustomEntityTile extends StatelessWidget {
             CustomText(
               text: trailingText!,
               style: AppTextStyles.label,
-              color: AppColors.primary,
+              color: palette.accentText,
             ),
           ],
           if (trailing != null) ...[
@@ -139,7 +137,7 @@ class CustomEntityTile extends StatelessWidget {
             Icon(
               Icons.chevron_right,
               size: AppDimensions.iconMd.r,
-              color: AppColors.neutral400,
+              color: palette.iconMuted,
             ),
           ],
         ],

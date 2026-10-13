@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:billing_and_sales_management/core/app_assets.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/features/auth/providers/auth_state_provider.dart';
 import 'package:billing_and_sales_management/features/auth/screens/login_screen.dart';
 import 'package:billing_and_sales_management/features/home/screens/home_screen.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -101,7 +103,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         _buildLogoBadge(),
         SizedBox(height: AppSpacing.xl.h),
         CustomText(
-          text: 'Billing & Sales\nManagement',
+          text: AppTranslate.splashTitle.tr(),
           style: AppTextStyles.heroTitle,
           color: AppColors.white,
           textAlign: TextAlign.center,
@@ -110,7 +112,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 240.w),
           child: CustomText(
-            text: 'Manage your business easily and efficiently',
+            text: AppTranslate.splashTagline.tr(),
             style: AppTextStyles.bodySmall.copyWith(
               height: AppTextStyles.heightRelaxed,
             ),

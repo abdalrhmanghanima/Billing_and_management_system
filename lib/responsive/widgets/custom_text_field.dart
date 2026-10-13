@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Reusable text input built on [TextFormField].
 ///
@@ -91,19 +94,22 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     final isMultiline = widget.maxLines > 1;
+    final palette = context.palette;
 
     final Widget? suffix =
         widget.suffixIcon ??
         (widget.obscureText
             ? IconButton(
                 onPressed: () => setState(() => _obscured = !_obscured),
-                tooltip: _obscured ? 'Show' : 'Hide',
+                tooltip: _obscured
+                    ? AppTranslate.show.tr()
+                    : AppTranslate.hide.tr(),
                 icon: Icon(
                   _obscured
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
                   size: AppDimensions.iconMd.r,
-                  color: AppColors.neutral400,
+                  color: palette.iconMuted,
                 ),
               )
             : null);
@@ -191,13 +197,15 @@ class CustomFieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         CustomText(
           text: label,
           style: AppTextStyles.label,
-          color: enabled ? AppColors.neutral700 : AppColors.neutral400,
+          color: enabled ? palette.textStrong : palette.textDisabled,
         ),
         if (isRequired)
           CustomText(

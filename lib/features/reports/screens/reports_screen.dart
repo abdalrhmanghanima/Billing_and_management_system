@@ -1,8 +1,10 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
 import 'package:billing_and_sales_management/features/dashboard/models/dashboard_state.dart';
 import 'package:billing_and_sales_management/features/invoices/providers/invoices_notifier.dart';
 import 'package:billing_and_sales_management/features/invoices/screens/invoice_details_screen.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -85,12 +87,12 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final toEmpty = _toDateController.text.trim().isEmpty;
 
     if (fromEmpty || toEmpty) {
-      setState(() => _rangeError = 'Please select both From and To dates');
+      setState(() => _rangeError = AppTranslate.pleaseSelectBothDates.tr());
       return;
     }
 
     if (_fromDate.isAfter(_toDate)) {
-      setState(() => _rangeError = 'From Date must not be after To Date');
+      setState(() => _rangeError = AppTranslate.fromDateAfterToDate.tr());
       return;
     }
 
@@ -125,8 +127,7 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
     final invoicesState = ref.watch(invoicesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(title: 'Sales Report'),
+      appBar: CustomAppBar(title: AppTranslate.salesReport.tr()),
       body: SafeArea(
         top: false,
         child: MaxWidthBox(
@@ -159,18 +160,18 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             children: [
               CustomTextField(
                 controller: _fromDateController,
-                label: 'From Date',
+                label: AppTranslate.fromDate.tr(),
                 isRequired: true,
-                hint: 'yyyy-MM-dd',
+                hint: AppTranslate.dateFormatHint.tr(),
                 prefixIcon: const Icon(Icons.calendar_today_outlined),
                 readOnly: true,
                 onTap: _pickFromDate,
               ),
               CustomTextField(
                 controller: _toDateController,
-                label: 'To Date',
+                label: AppTranslate.toDate.tr(),
                 isRequired: true,
-                hint: 'yyyy-MM-dd',
+                hint: AppTranslate.dateFormatHint.tr(),
                 prefixIcon: const Icon(Icons.calendar_today_outlined),
                 readOnly: true,
                 onTap: _pickToDate,
@@ -186,7 +187,10 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
             ),
           ],
           SizedBox(height: AppSpacing.md.h),
-          CustomButton(text: 'Show Report', onPressed: _showReport),
+          CustomButton(
+            text: AppTranslate.showReport.tr(),
+            onPressed: _showReport,
+          ),
         ],
       ),
     );
@@ -205,37 +209,36 @@ class _ReportsScreenState extends ConsumerState<ReportsScreen> {
         ],
       ),
       error: (error, _) => CustomErrorState(
-        title: 'Could not load invoices',
+        title: AppTranslate.couldNotLoadInvoices.tr(),
         onRetry: () => ref.read(invoicesProvider.notifier).refresh(),
       ),
       data: (invoices) {
         if (!_reportGenerated) {
-          return const CustomEmptyState(
+          return CustomEmptyState(
             icon: Icons.assessment_outlined,
-            iconColor: AppColors.purple,
-            iconBackgroundColor: AppColors.purpleSubtle,
-            title: 'No Data Yet',
-            message:
-                'Select a period and tap Show Report to view sales figures.',
+            iconColor: context.palette.purpleText,
+            iconBackgroundColor: context.palette.purpleSubtle,
+            title: AppTranslate.noDataYet.tr(),
+            message: AppTranslate.selectPeriodAndShowReportMessage.tr(),
           );
         }
 
         final filtered = _filterByRange(invoices);
 
         if (filtered.isEmpty) {
-          return const CustomEmptyState(
+          return CustomEmptyState(
             icon: Icons.assessment_outlined,
-            iconColor: AppColors.purple,
-            iconBackgroundColor: AppColors.purpleSubtle,
-            title: 'No Invoices Found',
-            message: 'There are no invoices in the selected period.',
+            iconColor: context.palette.purpleText,
+            iconBackgroundColor: context.palette.purpleSubtle,
+            title: AppTranslate.noInvoicesFound.tr(),
+            message: AppTranslate.noInvoicesInPeriodMessage.tr(),
           );
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const CustomSectionHeader(title: 'Sales Invoices'),
+            CustomSectionHeader(title: AppTranslate.salesInvoices.tr()),
             for (var i = 0; i < filtered.length; i++) ...[
               if (i > 0) SizedBox(height: AppSpacing.cardGap.h),
               _ReportInvoiceTile(
@@ -258,6 +261,8 @@ class _ReportInvoiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return CustomCard(
       onTap: onTap,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -268,7 +273,7 @@ class _ReportInvoiceTile extends StatelessWidget {
             height: 35.r,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.primarySubtle,
+              color: palette.primarySubtle,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd.r),
             ),
             padding: EdgeInsets.only(left: 4.w, right: 4.w),
@@ -276,7 +281,7 @@ class _ReportInvoiceTile extends StatelessWidget {
               text: '#${invoice.billNumber}',
               style: AppTextStyles.label,
               fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+              color: palette.accentText,
             ),
           ),
           SizedBox(width: AppSpacing.cardGap.w),
@@ -288,13 +293,13 @@ class _ReportInvoiceTile extends StatelessWidget {
                   text: invoice.clientName,
                   style: AppTextStyles.label,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.neutral900,
+                  color: palette.textPrimary,
                   maxLines: 1,
                 ),
                 CustomText(
                   text: invoice.billDate,
                   fontSize: AppTextStyles.size2xs,
-                  color: AppColors.neutral500,
+                  color: palette.textMuted,
                 ),
               ],
             ),
@@ -307,11 +312,13 @@ class _ReportInvoiceTile extends StatelessWidget {
                 text: DashboardAmountFormatter.format(invoice.billsTotal),
                 style: AppTextStyles.label,
                 fontWeight: FontWeight.w700,
-                color: AppColors.neutral900,
+                color: palette.textPrimary,
               ),
               SizedBox(height: AppSpacing.s2xs.h),
               CustomChip(
-                label: invoice.isPaid ? 'Paid' : 'Unpaid',
+                label: invoice.isPaid
+                    ? AppTranslate.paid.tr()
+                    : AppTranslate.unpaid.tr(),
                 variant: invoice.isPaid
                     ? CustomChipVariant.success
                     : CustomChipVariant.warning,

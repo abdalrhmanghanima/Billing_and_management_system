@@ -1,3 +1,4 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/features/clients/providers/clients_notifier.dart';
 import 'package:billing_and_sales_management/features/dashboard/models/dashboard_state.dart';
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
@@ -16,13 +17,13 @@ final dashboardProvider = Provider<DashboardState>((ref) {
     return const DashboardState(isLoading: true);
   }
 
-  final errors = <String>[];
-  if (invoicesAsync.hasError) errors.add('invoices');
-  if (clientsAsync.hasError) errors.add('clients');
-  if (itemsAsync.hasError) errors.add('items');
+  final failedEntityKeys = <String>[];
+  if (invoicesAsync.hasError) failedEntityKeys.add(AppTranslate.invoices);
+  if (clientsAsync.hasError) failedEntityKeys.add(AppTranslate.clients);
+  if (itemsAsync.hasError) failedEntityKeys.add(AppTranslate.items);
 
-  if (errors.isNotEmpty) {
-    return DashboardState(errorMessage: 'Failed to load ${errors.join(', ')}');
+  if (failedEntityKeys.isNotEmpty) {
+    return DashboardState(failedEntityKeys: failedEntityKeys);
   }
 
   final invoices = invoicesAsync.value ?? [];

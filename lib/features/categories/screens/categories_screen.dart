@@ -1,9 +1,11 @@
 import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/category_exception.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/categories/entities/category.dart';
 import 'package:billing_and_sales_management/features/categories/providers/categories_notifier.dart';
 import 'package:billing_and_sales_management/features/categories/widgets/category_form_sheet.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +31,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   void _openAddCategorySheet() {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Add Category',
+      title: AppTranslate.addCategory.tr(),
       builder: (_) => const CategoryFormSheet(),
     );
   }
@@ -37,7 +39,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   void _openEditCategorySheet(Category category) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Edit Category',
+      title: AppTranslate.editCategory.tr(),
       builder: (_) => CategoryFormSheet(existing: category),
     );
   }
@@ -47,10 +49,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: 'Delete Category?',
-      message:
-          'Are you sure you want to delete "${category.name}"? '
-          'This action cannot be undone.',
+      title: AppTranslate.deleteCategoryQuestion.tr(),
+      message: AppTranslate.deleteConfirmationMessage.tr(
+        namedArgs: {'name': category.name},
+      ),
     );
 
     if (!confirmed || !mounted) return;
@@ -67,16 +69,19 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
 
     switch (result) {
       case DeleteResult.success:
-        CustomSnackbar.showSuccess(context, 'Category deleted successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          AppTranslate.categoryDeletedSuccessfully.tr(),
+        );
       case DeleteResult.blocked:
         CustomSnackbar.showError(
           context,
-          'Cannot delete this category right now. Please try again.',
+          AppTranslate.cannotDeleteCategoryRightNow.tr(),
         );
       case DeleteResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not delete the category. Please try again.',
+          AppTranslate.couldNotDeleteCategory.tr(),
         );
     }
   }
@@ -95,10 +100,9 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
     final categoriesState = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Categories',
-        subtitle: 'Product Grouping',
+      appBar: CustomAppBar(
+        title: AppTranslate.categories.tr(),
+        subtitle: AppTranslate.categoriesSubtitle.tr(),
       ),
       floatingActionButton: _AddCategoryButton(
         onPressed: _openAddCategorySheet,
@@ -115,7 +119,7 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
               SizedBox(height: AppSpacing.base.h),
               CustomSearchBar(
                 controller: _searchController,
-                hint: 'Search categories...',
+                hint: AppTranslate.searchCategories.tr(),
                 onChanged: (value) => setState(() => _query = value),
               ),
               SizedBox(height: AppSpacing.base.h),
@@ -123,10 +127,10 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
                 child: categoriesState.when(
                   loading: () => const CustomSkeletonList(count: 4),
                   error: (error, _) => CustomErrorState(
-                    title: 'Could not load categories',
+                    title: AppTranslate.couldNotLoadCategories.tr(),
                     message: error is CategoryException
                         ? error.message
-                        : 'Something went wrong. Please try again.',
+                        : AppTranslate.somethingWentWrong.tr(),
                     onRetry: () =>
                         ref.read(categoriesProvider.notifier).refresh(),
                   ),
@@ -167,21 +171,21 @@ class _CategoriesList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (categories.isEmpty) {
       if (isSearching) {
-        return const CustomEmptyState(
+        return CustomEmptyState(
           icon: Icons.search_off_outlined,
-          title: 'No Categories Found',
-          message: 'No categories match your search.',
+          title: AppTranslate.noCategoriesFound.tr(),
+          message: AppTranslate.noCategoriesMatchSearch.tr(),
         );
       }
 
       return CustomEmptyState(
         icon: Icons.category_outlined,
         iconColor: AppColors.coral,
-        iconBackgroundColor: AppColors.coralSubtle,
-        title: 'No Categories Added',
-        message: 'Group your product inventory into clean categories.',
+        iconBackgroundColor: context.palette.coralSubtle,
+        title: AppTranslate.noCategoriesAdded.tr(),
+        message: AppTranslate.groupInventoryIntoCategoriesMessage.tr(),
         action: CustomButton(
-          text: '+ Add Category',
+          text: AppTranslate.plusAddCategory.tr(),
           size: CustomButtonSize.small,
           width: 200.w,
           onPressed: onAddCategory,
@@ -201,7 +205,7 @@ class _CategoriesList extends StatelessWidget {
           avatarTone: EntityAvatarTone.coral,
           title: category.name,
           subtitle: category.notes.isEmpty
-              ? 'Product category'
+              ? AppTranslate.productCategory.tr()
               : category.notes,
           showChevron: false,
           trailing: Row(
@@ -213,7 +217,7 @@ class _CategoriesList extends StatelessWidget {
                 size: AppDimensions.headerActionSize,
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
-                tooltip: 'Edit',
+                tooltip: AppTranslate.edit.tr(),
               ),
               SizedBox(width: AppSpacing.xs.w),
               CustomIconButton(
@@ -223,7 +227,7 @@ class _CategoriesList extends StatelessWidget {
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
                 foregroundColor: AppColors.error,
-                tooltip: 'Delete',
+                tooltip: AppTranslate.delete.tr(),
               ),
             ],
           ),

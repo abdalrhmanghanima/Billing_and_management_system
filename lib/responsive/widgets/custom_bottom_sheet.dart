@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/layout/responsive_sheet_content.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 
@@ -93,6 +93,8 @@ class _BottomSheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Container(
       padding: EdgeInsetsDirectional.only(
         start: AppSpacing.lg.w,
@@ -100,8 +102,8 @@ class _BottomSheetHeader extends StatelessWidget {
         top: AppSpacing.md.h,
         bottom: AppSpacing.md.h + 2.h,
       ),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.neutral150)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.subtleBorder)),
       ),
       child: Row(
         children: [
@@ -111,7 +113,7 @@ class _BottomSheetHeader extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: AppTextStyles.appBarTitle.copyWith(
-                color: AppColors.neutral900,
+                color: palette.textPrimary,
               ),
             ),
           ),
@@ -126,7 +128,7 @@ class _BottomSheetHeader extends StatelessWidget {
               ),
               style: IconButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                foregroundColor: AppColors.neutral700,
+                foregroundColor: palette.textStrong,
                 shape: const CircleBorder(),
               ),
               icon: Icon(Icons.close, size: 20.r),

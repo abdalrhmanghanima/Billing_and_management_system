@@ -1,3 +1,5 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:billing_and_sales_management/core/app_assets.dart';
@@ -53,13 +55,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   String? _validateEmail(String? value) {
     final email = value?.trim() ?? '';
-    if (email.isEmpty) return 'Email is required';
-    if (!_emailRegExp.hasMatch(email)) return 'Enter a valid email';
+    if (email.isEmpty) return AppTranslate.emailRequired.tr();
+    if (!_emailRegExp.hasMatch(email)) return AppTranslate.enterValidEmail.tr();
     return null;
   }
 
   String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) return 'Password is required';
+    if (value == null || value.isEmpty) {
+      return AppTranslate.passwordRequired.tr();
+    }
     return null;
   }
 
@@ -84,7 +88,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final loginState = ref.watch(loginProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -112,7 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: AppSpacing.s2xl.h),
-                      _buildHeader(),
+                      _buildHeader(context),
                       SizedBox(height: AppSpacing.xl.h),
                       SizedBox(height: 25.h),
                       _buildForm(loginState.isLoading),
@@ -127,7 +131,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       children: [
         Container(
@@ -143,16 +149,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         SizedBox(height: AppSpacing.base.h),
         CustomText(
-          text: 'Welcome Back',
+          text: AppTranslate.welcomeBack.tr(),
           style: AppTextStyles.heroTitle,
-          color: AppColors.neutral900,
+          color: palette.textPrimary,
           textAlign: TextAlign.center,
         ),
         SizedBox(height: AppSpacing.xs.h),
         CustomText(
-          text: 'Sign in to continue',
+          text: AppTranslate.signInToContinue.tr(),
           style: AppTextStyles.bodySmall,
-          color: AppColors.neutral500,
+          color: palette.textMuted,
           textAlign: TextAlign.center,
         ),
       ],
@@ -169,8 +175,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         children: [
           CustomTextField(
             controller: _emailController,
-            label: 'Email',
-            hint: 'Enter your email',
+            label: AppTranslate.email.tr(),
+            hint: AppTranslate.enterYourEmail.tr(),
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
             autofillHints: const [AutofillHints.email],
@@ -180,21 +186,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           SizedBox(height: AppSpacing.base.h),
           CustomTextField(
             controller: _passwordController,
-            label: 'Password',
-            hint: 'Enter password',
+            label: AppTranslate.password.tr(),
+            hint: AppTranslate.enterPassword.tr(),
             obscureText: !passwordVisible,
             suffixIcon: IconButton(
               onPressed: () {
                 ref.read(passwordVisibilityProvider.notifier).state =
                     !passwordVisible;
               },
-              tooltip: passwordVisible ? 'Hide' : 'Show',
+              tooltip: passwordVisible
+                  ? AppTranslate.hide.tr()
+                  : AppTranslate.show.tr(),
               icon: Icon(
                 passwordVisible
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
                 size: AppDimensions.iconMd.r,
-                color: AppColors.neutral400,
+                color: context.palette.iconMuted,
               ),
             ),
             keyboardType: TextInputType.visiblePassword,
@@ -204,7 +212,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             validator: _validatePassword,
           ),
           SizedBox(height: 24.h),
-          CustomButton(text: 'Sign In', loading: loading, onPressed: _submit),
+          CustomButton(
+            text: AppTranslate.signIn.tr(),
+            loading: loading,
+            onPressed: _submit,
+          ),
         ],
       ),
     );

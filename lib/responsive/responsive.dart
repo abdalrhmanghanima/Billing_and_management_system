@@ -20,6 +20,7 @@ export 'package:billing_and_sales_management/responsive/core/responsive_service.
 // Theme — colors, shadows, typography, dimensions, spacing, ThemeData factories.
 export 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 export 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+export 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 export 'package:billing_and_sales_management/responsive/theme/app_shadows.dart';
 export 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 export 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';

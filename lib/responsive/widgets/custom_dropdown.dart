@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
@@ -43,6 +43,8 @@ class CustomDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -61,9 +63,9 @@ class CustomDropdown<T> extends StatelessWidget {
           validator: validator,
           autofocus: autofocus,
           menuMaxHeight: 320.h,
-          dropdownColor: AppColors.white,
-          iconEnabledColor: AppColors.neutral500,
-          style: AppTextStyles.body.copyWith(color: AppColors.neutral900),
+          dropdownColor: palette.surface,
+          iconEnabledColor: palette.textMuted,
+          style: AppTextStyles.body.copyWith(color: palette.textPrimary),
           items: [
             for (final option in options)
               DropdownMenuItem<T>(
@@ -71,7 +73,7 @@ class CustomDropdown<T> extends StatelessWidget {
                 child: CustomText(
                   text: labelOf(option),
                   style: AppTextStyles.body,
-                  color: AppColors.neutral900,
+                  color: palette.textPrimary,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -87,7 +89,7 @@ class CustomDropdown<T> extends StatelessWidget {
               child: Icon(
                 Icons.expand_more,
                 size: AppDimensions.iconMd.r,
-                color: AppColors.neutral500,
+                color: palette.textMuted,
               ),
             ),
             suffixIconConstraints: BoxConstraints(

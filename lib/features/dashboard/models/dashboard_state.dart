@@ -1,4 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DashboardRecentInvoice {
   const DashboardRecentInvoice({
@@ -23,7 +25,7 @@ class DashboardRecentInvoice {
 class DashboardState {
   const DashboardState({
     this.isLoading = false,
-    this.errorMessage,
+    this.failedEntityKeys,
     this.invoiceCount = 0,
     this.clientCount = 0,
     this.itemCount = 0,
@@ -31,11 +33,19 @@ class DashboardState {
   });
 
   final bool isLoading;
-  final String? errorMessage;
+  final List<String>? failedEntityKeys;
   final int invoiceCount;
   final int clientCount;
   final int itemCount;
   final List<DashboardRecentInvoice> recentInvoices;
+
+  String? get errorMessage {
+    final keys = failedEntityKeys;
+    if (keys == null) return null;
+    return AppTranslate.failedToLoadEntities.tr(
+      namedArgs: {'entities': keys.map((key) => key.tr()).join(', ')},
+    );
+  }
 }
 
 class DashboardAmountFormatter {
@@ -63,6 +73,8 @@ class DashboardAmountFormatter {
 
     final suffix = decimals.isEmpty ? '' : '.$decimals';
     final sign = negative ? '-' : '';
-    return 'EGP $sign$grouped$suffix';
+    return AppTranslate.amountEgp.tr(
+      namedArgs: {'amount': '$sign$grouped$suffix'},
+    );
   }
 }

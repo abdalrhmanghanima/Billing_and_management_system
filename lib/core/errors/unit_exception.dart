@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class UnitExceptionCodes {
   const UnitExceptionCodes._();
 
@@ -16,15 +19,15 @@ class UnitException implements Exception {
   String get message {
     switch (code) {
       case UnitExceptionCodes.nameRequired:
-        return 'UNIT NAME is Required';
+        return AppTranslate.unitNameRequired.tr();
       case UnitExceptionCodes.nameDuplicate:
-        return 'UNIT NAME has already existed before';
+        return AppTranslate.unitNameAlreadyExists.tr();
       case UnitExceptionCodes.notFound:
-        return 'This unit no longer exists. It may have been deleted already.';
+        return AppTranslate.unitNotFound.tr();
       case UnitExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

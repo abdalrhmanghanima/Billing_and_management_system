@@ -1,11 +1,14 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_button.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Centered error placeholder styled like the design's empty state but with
 /// the semantic error palette.
@@ -18,7 +21,7 @@ class CustomErrorState extends StatelessWidget {
     this.message,
     this.icon = Icons.error_outline,
     this.onRetry,
-    this.retryLabel = 'Retry',
+    this.retryLabel,
     this.action,
   });
 
@@ -26,13 +29,15 @@ class CustomErrorState extends StatelessWidget {
   final String? message;
   final IconData icon;
   final VoidCallback? onRetry;
-  final String retryLabel;
+  final String? retryLabel;
 
   /// Custom action widget; replaces the built-in retry button.
   final Widget? action;
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -45,8 +50,8 @@ class CustomErrorState extends StatelessWidget {
             Container(
               width: AppDimensions.emptyStateIconBox.r,
               height: AppDimensions.emptyStateIconBox.r,
-              decoration: const BoxDecoration(
-                color: AppColors.errorBg,
+              decoration: BoxDecoration(
+                color: palette.errorBg,
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -59,7 +64,7 @@ class CustomErrorState extends StatelessWidget {
             CustomText(
               text: title,
               style: AppTextStyles.sectionTitle,
-              color: AppColors.neutral900,
+              color: palette.textPrimary,
               textAlign: TextAlign.center,
             ),
             if (message != null) ...[
@@ -71,7 +76,7 @@ class CustomErrorState extends StatelessWidget {
                   style: AppTextStyles.bodySmall.copyWith(
                     height: AppTextStyles.heightRelaxed,
                   ),
-                  color: AppColors.neutral500,
+                  color: palette.textMuted,
                   textAlign: TextAlign.center,
                   maxLines: 4,
                 ),
@@ -81,7 +86,7 @@ class CustomErrorState extends StatelessWidget {
               SizedBox(height: AppSpacing.lg.h),
               action ??
                   CustomButton(
-                    text: retryLabel,
+                    text: retryLabel ?? AppTranslate.retry.tr(),
                     onPressed: onRetry,
                     width: 220.w,
                   ),

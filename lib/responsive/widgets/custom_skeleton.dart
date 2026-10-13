@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 
 /// Single shimmer block (design's `.skeleton`).
@@ -38,6 +38,8 @@ class _CustomSkeletonState extends State<CustomSkeleton>
 
   @override
   Widget build(BuildContext context) {
+    final shimmerColors = context.palette.skeletonColors;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
@@ -52,11 +54,7 @@ class _CustomSkeletonState extends State<CustomSkeleton>
             gradient: LinearGradient(
               begin: Alignment(-1 + 2 * _controller.value, 0),
               end: Alignment(1 + 2 * _controller.value, 0),
-              colors: const [
-                AppColors.neutral200,
-                AppColors.neutral100,
-                AppColors.neutral200,
-              ],
+              colors: shimmerColors,
             ),
           ),
         );

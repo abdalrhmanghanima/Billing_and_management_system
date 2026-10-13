@@ -2,8 +2,8 @@
 import 'package:billing_and_sales_management/responsive/core/breakpoints.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/navigation/responsive_navigation.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
 
@@ -53,9 +53,10 @@ class ResponsiveSideNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = backgroundColor ?? AppColors.surface;
-    final highlight = selectedColor ?? AppColors.primary;
-    final highlightText = selectedLabelColor ?? AppColors.primary;
+    final palette = context.palette;
+    final bg = backgroundColor ?? palette.surface;
+    final highlight = selectedColor ?? palette.accentText;
+    final highlightText = selectedLabelColor ?? palette.accentText;
     final index = selectedIndex.clamp(0, items.isEmpty ? 0 : items.length - 1);
     final radius = AppDimensions.radiusLg.r;
 
@@ -63,9 +64,7 @@ class ResponsiveSideNav extends StatelessWidget {
       width: width,
       decoration: BoxDecoration(
         color: bg,
-        border: const BorderDirectional(
-          end: BorderSide(color: AppColors.border),
-        ),
+        border: BorderDirectional(end: BorderSide(color: palette.border)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -115,7 +114,7 @@ class ResponsiveSideNav extends StatelessWidget {
                               size: AppDimensions.iconLg.r,
                               color: selected
                                   ? highlightText
-                                  : AppColors.textSecondary,
+                                  : palette.textSecondary,
                             ),
                             SizedBox(width: AppSpacing.md.r),
                             Expanded(
@@ -126,7 +125,7 @@ class ResponsiveSideNav extends StatelessWidget {
                                     : FontWeight.w500,
                                 color: selected
                                     ? highlightText
-                                    : AppColors.textSecondary,
+                                    : palette.textSecondary,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),

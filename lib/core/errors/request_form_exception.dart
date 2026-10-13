@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class RequestFormExceptionCodes {
   const RequestFormExceptionCodes._();
 
@@ -21,23 +24,23 @@ class RequestFormException implements Exception {
   String get message {
     switch (code) {
       case RequestFormExceptionCodes.employeeNameRequired:
-        return 'Employee NAME is Required';
+        return AppTranslate.employeeNameRequired.tr();
       case RequestFormExceptionCodes.dateRequired:
-        return 'DATE is Required';
+        return AppTranslate.dateRequired.tr();
       case RequestFormExceptionCodes.startTimeRequired:
-        return 'Start Time is Required';
+        return AppTranslate.startTimeRequired.tr();
       case RequestFormExceptionCodes.endTimeRequired:
-        return 'End Time is Required';
+        return AppTranslate.endTimeRequired.tr();
       case RequestFormExceptionCodes.startTimeInvalid:
-        return 'Start Time is Invalid';
+        return AppTranslate.startTimeInvalid.tr();
       case RequestFormExceptionCodes.endTimeInvalid:
-        return 'End Time is Invalid';
+        return AppTranslate.endTimeInvalid.tr();
       case RequestFormExceptionCodes.endTimeNotAfterStartTime:
-        return 'End Time must be greater than Start Time';
+        return AppTranslate.endTimeMustBeAfterStartTime.tr();
       case RequestFormExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

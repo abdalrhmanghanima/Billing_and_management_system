@@ -1,9 +1,11 @@
 import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/item_exception.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/items/entities/item.dart';
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
 import 'package:billing_and_sales_management/features/items/widgets/item_form_sheet.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,6 +21,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
 
   String _query = '';
   bool _isDeleting = false;
+  bool _isRefreshing = false;
 
   @override
   void dispose() {
@@ -29,7 +32,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
   void _openAddItemSheet() {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Add Item',
+      title: AppTranslate.addItem.tr(),
       builder: (_) => const ItemFormSheet(),
     );
   }
@@ -37,7 +40,7 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
   void _openEditItemSheet(Item item) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Edit Item',
+      title: AppTranslate.editItem.tr(),
       builder: (_) => ItemFormSheet(existing: item),
     );
   }
@@ -47,10 +50,10 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: 'Delete Item?',
-      message:
-          'Are you sure you want to delete "${item.name}"? '
-          'This action cannot be undone.',
+      title: AppTranslate.deleteItemQuestion.tr(),
+      message: AppTranslate.deleteConfirmationMessage.tr(
+        namedArgs: {'name': item.name},
+      ),
     );
 
     if (!confirmed || !mounted) return;
@@ -65,17 +68,17 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
 
     switch (result) {
       case DeleteResult.success:
-        CustomSnackbar.showSuccess(context, 'Item deleted successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          AppTranslate.itemDeletedSuccessfully.tr(),
+        );
       case DeleteResult.blocked:
         CustomSnackbar.showError(
           context,
-          'Cannot delete this item right now. Please try again.',
+          AppTranslate.cannotDeleteItemRightNow.tr(),
         );
       case DeleteResult.failure:
-        CustomSnackbar.showError(
-          context,
-          'Could not delete the item. Please try again.',
-        );
+        CustomSnackbar.showError(context, AppTranslate.couldNotDeleteItem.tr());
     }
   }
 
@@ -92,6 +95,16 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
         .toList();
   }
 
+  Future<void> _refresh() async {
+    if (_isRefreshing) return;
+    _isRefreshing = true;
+    try {
+      await ref.read(itemsProvider.notifier).refresh();
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
   String _formatPrice(double value) => value.toStringAsFixed(2);
 
   @override
@@ -99,10 +112,9 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
     final itemsState = ref.watch(itemsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Items',
-        subtitle: 'Product Catalog',
+      appBar: CustomAppBar(
+        title: AppTranslate.items.tr(),
+        subtitle: AppTranslate.itemsSubtitle.tr(),
         showBackArrow: false,
       ),
       body: MaxWidthBox(
@@ -117,27 +129,40 @@ class _ItemsScreenState extends ConsumerState<ItemsScreen> {
               SizedBox(height: AppSpacing.base.h),
               CustomSearchBar(
                 controller: _searchController,
-                hint: 'Search items...',
+                hint: AppTranslate.searchItems.tr(),
                 onChanged: (value) => setState(() => _query = value),
               ),
               SizedBox(height: AppSpacing.base.h),
               Expanded(
-                child: itemsState.when(
-                  loading: () => const CustomSkeletonList(count: 4),
-                  error: (error, _) => CustomErrorState(
-                    title: 'Could not load items',
-                    message: error is ItemException
-                        ? error.message
-                        : 'Something went wrong. Please try again.',
-                    onRetry: () => ref.read(itemsProvider.notifier).refresh(),
-                  ),
-                  data: (items) => _ItemsList(
-                    items: _filter(items),
-                    isSearching: _query.trim().isNotEmpty,
-                    onAddItem: _openAddItemSheet,
-                    onEditItem: _openEditItemSheet,
-                    onDeleteItem: _confirmDeleteItem,
-                    formatPrice: _formatPrice,
+                child: RefreshIndicator(
+                  color: context.palette.accentText,
+                  onRefresh: _refresh,
+                  child: itemsState.when(
+                    loading: () => const CustomSkeletonList(count: 4),
+                    error: (error, _) => CustomScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: CustomErrorState(
+                            title: AppTranslate.couldNotLoadItems.tr(),
+                            message: error is ItemException
+                                ? error.message
+                                : AppTranslate.somethingWentWrong.tr(),
+                            onRetry: () =>
+                                ref.read(itemsProvider.notifier).refresh(),
+                          ),
+                        ),
+                      ],
+                    ),
+                    data: (items) => _ItemsList(
+                      items: _filter(items),
+                      isSearching: _query.trim().isNotEmpty,
+                      onAddItem: _openAddItemSheet,
+                      onEditItem: _openEditItemSheet,
+                      onDeleteItem: _confirmDeleteItem,
+                      formatPrice: _formatPrice,
+                    ),
                   ),
                 ),
               ),
@@ -171,30 +196,34 @@ class _ItemsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      if (isSearching) {
-        return const CustomEmptyState(
-          icon: Icons.search_off_outlined,
-          title: 'No Items Found',
-          message: 'No items match your search.',
-        );
-      }
+      final emptyState = isSearching
+          ? CustomEmptyState(
+              icon: Icons.search_off_outlined,
+              title: AppTranslate.noItemsFound.tr(),
+              message: AppTranslate.noItemsMatchSearch.tr(),
+            )
+          : CustomEmptyState(
+              icon: Icons.inventory_2_outlined,
+              iconColor: context.palette.accentText,
+              iconBackgroundColor: context.palette.primarySubtle,
+              title: AppTranslate.noItemsInCatalog.tr(),
+              message: AppTranslate.registerProductInventoryMessage.tr(),
+              action: CustomButton(
+                text: AppTranslate.plusAddItem.tr(),
+                size: CustomButtonSize.small,
+                width: 200.w,
+                onPressed: onAddItem,
+              ),
+            );
 
-      return CustomEmptyState(
-        icon: Icons.inventory_2_outlined,
-        iconColor: AppColors.primary,
-        iconBackgroundColor: AppColors.primarySubtle,
-        title: 'No Items in Catalog',
-        message: 'Register product inventory to start selling.',
-        action: CustomButton(
-          text: '+ Add Item',
-          size: CustomButtonSize.small,
-          width: 200.w,
-          onPressed: onAddItem,
-        ),
+      return CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [SliverFillRemaining(hasScrollBody: false, child: emptyState)],
       );
     }
 
     return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: items.length,
       separatorBuilder: (context, index) =>
           SizedBox(height: AppSpacing.cardGap.h),
@@ -217,7 +246,7 @@ class _ItemsList extends StatelessWidget {
                 size: AppDimensions.headerActionSize,
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
-                tooltip: 'Edit',
+                tooltip: AppTranslate.edit.tr(),
               ),
               SizedBox(width: AppSpacing.xs.w),
               CustomIconButton(
@@ -227,7 +256,7 @@ class _ItemsList extends StatelessWidget {
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
                 foregroundColor: AppColors.error,
-                tooltip: 'Delete',
+                tooltip: AppTranslate.delete.tr(),
               ),
             ],
           ),

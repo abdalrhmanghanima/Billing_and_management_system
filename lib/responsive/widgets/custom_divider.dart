@@ -1,5 +1,5 @@
 ﻿import 'package:flutter/material.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 
 /// Thin horizontal divider using the theme's border color.
 class CustomDivider extends StatelessWidget {
@@ -23,7 +23,7 @@ class CustomDivider extends StatelessWidget {
     return Divider(
       height: height,
       thickness: thickness,
-      color: color ?? AppColors.border,
+      color: color ?? context.palette.border,
       indent: indent,
       endIndent: endIndent,
     );

@@ -1,4 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class RequestFormFields extends StatelessWidget {
@@ -41,9 +43,9 @@ class RequestFormFields extends StatelessWidget {
       children: [
         CustomTextField(
           controller: employeeNameController,
-          label: 'Employee Name',
+          label: AppTranslate.employeeName.tr(),
           isRequired: true,
-          hint: 'Enter employee name',
+          hint: AppTranslate.enterEmployeeName.tr(),
           errorText: employeeNameError,
           enabled: enabled,
           textInputAction: TextInputAction.next,
@@ -52,9 +54,9 @@ class RequestFormFields extends StatelessWidget {
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: dateController,
-          label: 'Date',
+          label: AppTranslate.date.tr(),
           isRequired: true,
-          hint: 'yyyy-MM-dd',
+          hint: AppTranslate.dateFormatHint.tr(),
           errorText: dateError,
           prefixIcon: const Icon(Icons.calendar_today_outlined),
           enabled: enabled,
@@ -66,9 +68,9 @@ class RequestFormFields extends StatelessWidget {
           children: [
             CustomTextField(
               controller: startTimeController,
-              label: 'Start Time',
+              label: AppTranslate.startTime.tr(),
               isRequired: true,
-              hint: 'hh:mm AM',
+              hint: AppTranslate.timeFormatHint.tr(),
               errorText: startTimeError,
               prefixIcon: const Icon(Icons.access_time_outlined),
               enabled: enabled,
@@ -77,9 +79,9 @@ class RequestFormFields extends StatelessWidget {
             ),
             CustomTextField(
               controller: endTimeController,
-              label: 'End Time',
+              label: AppTranslate.endTime.tr(),
               isRequired: true,
-              hint: 'hh:mm AM',
+              hint: AppTranslate.timeFormatHint.tr(),
               errorText: endTimeError,
               prefixIcon: const Icon(Icons.access_time_outlined),
               enabled: enabled,

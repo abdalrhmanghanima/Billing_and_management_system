@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
@@ -56,7 +57,7 @@ class CustomChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = _palette();
+    final palette = _palette(context.palette);
 
     final bg = selected
         ? AppColors.primary
@@ -111,55 +112,55 @@ class CustomChip extends StatelessWidget {
     );
   }
 
-  ({Color background, Color text, BorderSide border}) _palette() {
+  ({Color background, Color text, BorderSide border}) _palette(AppPalette p) {
     switch (variant) {
       case CustomChipVariant.neutral:
         return (
-          background: AppColors.neutral100,
-          text: AppColors.neutral600,
-          border: const BorderSide(color: AppColors.neutral200),
+          background: p.subtleSurface,
+          text: p.textSecondary,
+          border: BorderSide(color: p.border),
         );
       case CustomChipVariant.primary:
         return (
-          background: AppColors.primarySubtle,
-          text: AppColors.primary,
-          border: const BorderSide(color: AppColors.primarySubtle),
+          background: p.primarySubtle,
+          text: p.accentText,
+          border: BorderSide(color: p.primarySubtle),
         );
       case CustomChipVariant.cyan:
         return (
-          background: AppColors.cyanLight,
-          text: AppColors.cyanDark,
-          border: const BorderSide(color: AppColors.cyanLight),
+          background: p.cyanLight,
+          text: p.cyanText,
+          border: BorderSide(color: p.cyanLight),
         );
       case CustomChipVariant.coral:
         return (
-          background: AppColors.coralSubtle,
-          text: AppColors.coral,
-          border: const BorderSide(color: AppColors.coralBorder),
+          background: p.coralSubtle,
+          text: p.coralText,
+          border: BorderSide(color: p.coralBorder),
         );
       case CustomChipVariant.success:
         return (
-          background: AppColors.successBg,
-          text: AppColors.successText,
-          border: const BorderSide(color: AppColors.successBorder),
+          background: p.successBg,
+          text: p.successText,
+          border: BorderSide(color: p.successBorder),
         );
       case CustomChipVariant.warning:
         return (
-          background: AppColors.warningBg,
-          text: AppColors.warningText,
-          border: const BorderSide(color: AppColors.warningBorder),
+          background: p.warningBg,
+          text: p.warningText,
+          border: BorderSide(color: p.warningBorder),
         );
       case CustomChipVariant.error:
         return (
-          background: AppColors.errorBg,
-          text: AppColors.errorText,
-          border: const BorderSide(color: AppColors.errorBorder),
+          background: p.errorBg,
+          text: p.errorText,
+          border: BorderSide(color: p.errorBorder),
         );
       case CustomChipVariant.info:
         return (
-          background: AppColors.infoBg,
+          background: p.infoBg,
           text: AppColors.info,
-          border: const BorderSide(color: AppColors.infoBorder),
+          border: BorderSide(color: p.infoBorder),
         );
     }
   }

@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class TypeExceptionCodes {
   const TypeExceptionCodes._();
 
@@ -19,21 +22,21 @@ class TypeException implements Exception {
   String get message {
     switch (code) {
       case TypeExceptionCodes.companyRequired:
-        return 'COMPANY NAME is Required';
+        return AppTranslate.companyNameRequired.tr();
       case TypeExceptionCodes.nameRequired:
-        return 'TYPE NAME is Required';
+        return AppTranslate.typeNameRequired.tr();
       case TypeExceptionCodes.nameDuplicate:
-        return 'TYPE NAME has already existed before';
+        return AppTranslate.typeNameAlreadyExists.tr();
       case TypeExceptionCodes.notFound:
-        return 'This type no longer exists. It may have been deleted already.';
+        return AppTranslate.typeNotFound.tr();
       case TypeExceptionCodes.inUse:
-        return 'Cannot delete this type because it is used by existing items.';
+        return AppTranslate.typeInUse.tr();
       case TypeExceptionCodes.tooManyReferences:
-        return 'Cannot update this type because too many items are linked to it.';
+        return AppTranslate.typeTooManyReferences.tr();
       case TypeExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

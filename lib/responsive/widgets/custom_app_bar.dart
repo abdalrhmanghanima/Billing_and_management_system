@@ -1,8 +1,8 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
 
@@ -55,6 +55,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     final scheme = Theme.of(context).colorScheme;
+    final palette = context.palette;
     final showLeading = leading != null || showBackArrow;
 
     return AppBar(
@@ -75,7 +76,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   padding: EdgeInsetsDirectional.only(start: 4.r),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.transparent,
-                    foregroundColor: AppColors.neutral700,
+                    foregroundColor: palette.textStrong,
                     minimumSize: Size(
                       AppDimensions.headerActionSize.w,
                       AppDimensions.headerActionSize.w,
@@ -107,7 +108,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   CustomText(
                     text: subtitle!,
                     style: AppTextStyles.microLabel,
-                    color: AppColors.textMuted,
+                    color: palette.textMuted,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -128,7 +129,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: bordered
           ? PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: AppColors.border),
+              child: Container(height: 1, color: palette.border),
             )
           : null,
     );

@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class ItemExceptionCodes {
   const ItemExceptionCodes._();
 
@@ -22,25 +25,25 @@ class ItemException implements Exception {
   String get message {
     switch (code) {
       case ItemExceptionCodes.companyRequired:
-        return 'COMPANY NAME is Required';
+        return AppTranslate.companyNameRequired.tr();
       case ItemExceptionCodes.typeRequired:
-        return 'TYPE NAME is Required';
+        return AppTranslate.typeNameRequired.tr();
       case ItemExceptionCodes.nameRequired:
-        return 'ITEM NAME is Required';
+        return AppTranslate.itemNameRequired.tr();
       case ItemExceptionCodes.nameDuplicate:
-        return 'ITEM NAME has already existed before';
+        return AppTranslate.itemNameAlreadyExists.tr();
       case ItemExceptionCodes.notFound:
-        return 'This item no longer exists. It may have been deleted already.';
+        return AppTranslate.itemNotFound.tr();
       case ItemExceptionCodes.sellingPriceInvalid:
-        return 'SELLING PRICE Must be Greater than or equal Zero';
+        return AppTranslate.sellingPriceInvalid.tr();
       case ItemExceptionCodes.buyingPriceInvalid:
-        return 'BUYING PRICE Must be Greater than or equal Zero';
+        return AppTranslate.buyingPriceInvalid.tr();
       case ItemExceptionCodes.buyingPriceExceedsSelling:
-        return 'BUYING PRICE Must be less than or equal SELLING PRICE';
+        return AppTranslate.buyingPriceExceedsSelling.tr();
       case ItemExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

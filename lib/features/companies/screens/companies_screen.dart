@@ -1,9 +1,11 @@
 import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/company_exception.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/features/companies/widgets/company_form_sheet.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +31,7 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
   void _openAddCompanySheet() {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Add Company',
+      title: AppTranslate.addCompany.tr(),
       builder: (_) => const CompanyFormSheet(),
     );
   }
@@ -37,7 +39,7 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
   void _openEditCompanySheet(Company company) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Edit Company',
+      title: AppTranslate.editCompany.tr(),
       builder: (_) => CompanyFormSheet(existing: company),
     );
   }
@@ -47,10 +49,10 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: 'Delete Company?',
-      message:
-          'Are you sure you want to delete "${company.name}"? '
-          'This action cannot be undone.',
+      title: AppTranslate.deleteCompanyQuestion.tr(),
+      message: AppTranslate.deleteConfirmationMessage.tr(
+        namedArgs: {'name': company.name},
+      ),
     );
 
     if (!confirmed || !mounted) return;
@@ -67,7 +69,10 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
 
     switch (result) {
       case DeleteResult.success:
-        CustomSnackbar.showSuccess(context, 'Company deleted successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          AppTranslate.companyDeletedSuccessfully.tr(),
+        );
       case DeleteResult.blocked:
         final error = ref
             .read(companiesProvider)
@@ -77,13 +82,12 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
             );
         CustomSnackbar.showError(
           context,
-          error?.message ??
-              'Cannot delete this company because it is used by existing types or items.',
+          error?.message ?? AppTranslate.companyInUse.tr(),
         );
       case DeleteResult.failure:
         CustomSnackbar.showError(
           context,
-          'Could not delete the company. Please try again.',
+          AppTranslate.couldNotDeleteCompany.tr(),
         );
     }
   }
@@ -106,10 +110,9 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
     final companiesState = ref.watch(companiesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Companies',
-        subtitle: 'Supplier & Brand Catalog',
+      appBar: CustomAppBar(
+        title: AppTranslate.companies.tr(),
+        subtitle: AppTranslate.companiesSubtitle.tr(),
       ),
       floatingActionButton: _AddCompanyButton(onPressed: _openAddCompanySheet),
       body: MaxWidthBox(
@@ -124,7 +127,7 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
               SizedBox(height: AppSpacing.base.h),
               CustomSearchBar(
                 controller: _searchController,
-                hint: 'Search companies...',
+                hint: AppTranslate.searchCompanies.tr(),
                 onChanged: (value) => setState(() => _query = value),
               ),
               SizedBox(height: AppSpacing.base.h),
@@ -132,10 +135,10 @@ class _CompaniesScreenState extends ConsumerState<CompaniesScreen> {
                 child: companiesState.when(
                   loading: () => const CustomSkeletonList(count: 4),
                   error: (error, _) => CustomErrorState(
-                    title: 'Could not load companies',
+                    title: AppTranslate.couldNotLoadCompanies.tr(),
                     message: error is CompanyException
                         ? error.message
-                        : 'Something went wrong. Please try again.',
+                        : AppTranslate.somethingWentWrong.tr(),
                     onRetry: () =>
                         ref.read(companiesProvider.notifier).refresh(),
                   ),
@@ -174,23 +177,25 @@ class _CompaniesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     if (companies.isEmpty) {
       if (isSearching) {
-        return const CustomEmptyState(
+        return CustomEmptyState(
           icon: Icons.search_off_outlined,
-          title: 'No Companies Found',
-          message: 'No companies match your search.',
+          title: AppTranslate.noCompaniesFound.tr(),
+          message: AppTranslate.noCompaniesMatchSearch.tr(),
         );
       }
 
       return CustomEmptyState(
         icon: Icons.business_outlined,
-        iconColor: AppColors.cyanDark,
-        iconBackgroundColor: AppColors.cyanLight,
-        title: 'No Companies Added',
-        message: 'Add your supplier or brand companies here.',
+        iconColor: palette.cyanText,
+        iconBackgroundColor: palette.cyanLight,
+        title: AppTranslate.noCompaniesAdded.tr(),
+        message: AppTranslate.addSupplierOrBrandCompaniesMessage.tr(),
         action: CustomButton(
-          text: '+ Add Company',
+          text: AppTranslate.plusAddCompany.tr(),
           size: CustomButtonSize.small,
           width: 200.w,
           onPressed: onAddCompany,
@@ -210,7 +215,7 @@ class _CompaniesList extends StatelessWidget {
           avatarTone: EntityAvatarTone.cyan,
           title: company.name,
           subtitle: company.notes.isEmpty
-              ? 'No description notes'
+              ? AppTranslate.noDescriptionNotes.tr()
               : company.notes,
           showChevron: false,
           trailing: Row(
@@ -222,7 +227,7 @@ class _CompaniesList extends StatelessWidget {
                 size: AppDimensions.headerActionSize,
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
-                tooltip: 'Edit',
+                tooltip: AppTranslate.edit.tr(),
               ),
               SizedBox(width: AppSpacing.xs.w),
               CustomIconButton(
@@ -232,7 +237,7 @@ class _CompaniesList extends StatelessWidget {
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
                 foregroundColor: AppColors.error,
-                tooltip: 'Delete',
+                tooltip: AppTranslate.delete.tr(),
               ),
             ],
           ),

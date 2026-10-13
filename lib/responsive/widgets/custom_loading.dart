@@ -1,7 +1,7 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
 
@@ -51,7 +51,7 @@ class CustomLoading extends StatelessWidget {
       dimension: size.r,
       child: CircularProgressIndicator(
         strokeWidth: strokeWidth,
-        color: color ?? AppColors.white,
+        color: color ?? context.palette.accentText,
       ),
     );
 
@@ -64,7 +64,7 @@ class CustomLoading extends StatelessWidget {
         SizedBox(height: AppSpacing.md.r),
         CustomText(
           text: message!,
-          color: AppColors.textSecondary,
+          color: context.palette.textSecondary,
           textAlign: TextAlign.center,
         ),
       ],

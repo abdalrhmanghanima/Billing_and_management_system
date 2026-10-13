@@ -1,9 +1,11 @@
 import 'package:billing_and_sales_management/core/enums/delete_result.dart';
 import 'package:billing_and_sales_management/core/errors/type_exception.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/types/entities/item_type.dart';
 import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
 import 'package:billing_and_sales_management/features/types/widgets/type_form_sheet.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,7 +31,7 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
   void _openAddTypeSheet() {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Add Type',
+      title: AppTranslate.addType.tr(),
       builder: (_) => const TypeFormSheet(),
     );
   }
@@ -37,7 +39,7 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
   void _openEditTypeSheet(ItemType type) {
     showAppBottomSheet<void>(
       context: context,
-      title: 'Edit Type',
+      title: AppTranslate.editType.tr(),
       builder: (_) => TypeFormSheet(existing: type),
     );
   }
@@ -47,10 +49,10 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
 
     final confirmed = await showConfirmDeleteDialog(
       context: context,
-      title: 'Delete Type?',
-      message:
-          'Are you sure you want to delete "${type.name}"? '
-          'This action cannot be undone.',
+      title: AppTranslate.deleteTypeQuestion.tr(),
+      message: AppTranslate.deleteConfirmationMessage.tr(
+        namedArgs: {'name': type.name},
+      ),
     );
 
     if (!confirmed || !mounted) return;
@@ -65,7 +67,10 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
 
     switch (result) {
       case DeleteResult.success:
-        CustomSnackbar.showSuccess(context, 'Type deleted successfully.');
+        CustomSnackbar.showSuccess(
+          context,
+          AppTranslate.typeDeletedSuccessfully.tr(),
+        );
       case DeleteResult.blocked:
         final error = ref
             .read(typesProvider)
@@ -75,14 +80,10 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
             );
         CustomSnackbar.showError(
           context,
-          error?.message ??
-              'Cannot delete this type because it is used by existing items.',
+          error?.message ?? AppTranslate.typeInUse.tr(),
         );
       case DeleteResult.failure:
-        CustomSnackbar.showError(
-          context,
-          'Could not delete the type. Please try again.',
-        );
+        CustomSnackbar.showError(context, AppTranslate.couldNotDeleteType.tr());
     }
   }
 
@@ -104,10 +105,9 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
     final typesState = ref.watch(typesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: const CustomAppBar(
-        title: 'Types',
-        subtitle: 'Item Classifications',
+      appBar: CustomAppBar(
+        title: AppTranslate.types.tr(),
+        subtitle: AppTranslate.typesSubtitle.tr(),
       ),
       floatingActionButton: _AddTypeButton(onPressed: _openAddTypeSheet),
       body: MaxWidthBox(
@@ -122,7 +122,7 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
               SizedBox(height: AppSpacing.base.h),
               CustomSearchBar(
                 controller: _searchController,
-                hint: 'Search types...',
+                hint: AppTranslate.searchTypes.tr(),
                 onChanged: (value) => setState(() => _query = value),
               ),
               SizedBox(height: AppSpacing.base.h),
@@ -130,10 +130,10 @@ class _TypesScreenState extends ConsumerState<TypesScreen> {
                 child: typesState.when(
                   loading: () => const CustomSkeletonList(count: 4),
                   error: (error, _) => CustomErrorState(
-                    title: 'Could not load types',
+                    title: AppTranslate.couldNotLoadTypes.tr(),
                     message: error is TypeException
                         ? error.message
-                        : 'Something went wrong. Please try again.',
+                        : AppTranslate.somethingWentWrong.tr(),
                     onRetry: () => ref.read(typesProvider.notifier).refresh(),
                   ),
                   data: (types) => _TypesList(
@@ -173,19 +173,19 @@ class _TypesList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (types.isEmpty) {
       if (isSearching) {
-        return const CustomEmptyState(
+        return CustomEmptyState(
           icon: Icons.search_off_outlined,
-          title: 'No Types Found',
-          message: 'No types match your search.',
+          title: AppTranslate.noTypesFound.tr(),
+          message: AppTranslate.noTypesMatchSearch.tr(),
         );
       }
 
       return CustomEmptyState(
         icon: Icons.description_outlined,
-        title: 'No Types Found',
-        message: 'Create item categories/types under companies.',
+        title: AppTranslate.noTypesFound.tr(),
+        message: AppTranslate.createItemTypesUnderCompaniesMessage.tr(),
         action: CustomButton(
-          text: '+ Add Type',
+          text: AppTranslate.plusAddType.tr(),
           size: CustomButtonSize.small,
           width: 200.w,
           onPressed: onAddType,
@@ -215,7 +215,7 @@ class _TypesList extends StatelessWidget {
                 size: AppDimensions.headerActionSize,
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
-                tooltip: 'Edit',
+                tooltip: AppTranslate.edit.tr(),
               ),
               SizedBox(width: AppSpacing.xs.w),
               CustomIconButton(
@@ -225,7 +225,7 @@ class _TypesList extends StatelessWidget {
                 iconSize: AppDimensions.iconSm,
                 shadow: false,
                 foregroundColor: AppColors.error,
-                tooltip: 'Delete',
+                tooltip: AppTranslate.delete.tr(),
               ),
             ],
           ),

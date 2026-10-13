@@ -1,7 +1,9 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
 import 'package:billing_and_sales_management/features/companies/providers/companies_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +46,7 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
 
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _nameError = 'COMPANY NAME is Required');
+      setState(() => _nameError = AppTranslate.companyNameRequired.tr());
       return;
     }
 
@@ -71,18 +73,18 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
         CustomSnackbar.showSuccess(
           context,
           _isEditing
-              ? 'Company updated successfully.'
-              : 'Company saved successfully.',
+              ? AppTranslate.companyUpdatedSuccessfully.tr()
+              : AppTranslate.companySavedSuccessfully.tr(),
         );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
-        setState(() => _nameError = 'COMPANY NAME has already existed before');
+        setState(() => _nameError = AppTranslate.companyNameAlreadyExists.tr());
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
           _isEditing
-              ? 'Could not update the company. Please try again.'
-              : 'Could not save the company. Please try again.',
+              ? AppTranslate.couldNotUpdateCompany.tr()
+              : AppTranslate.couldNotSaveCompany.tr(),
         );
     }
   }
@@ -95,9 +97,9 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
       children: [
         CustomTextField(
           controller: _nameController,
-          label: 'Company Name',
+          label: AppTranslate.companyName.tr(),
           isRequired: true,
-          hint: 'Enter company name',
+          hint: AppTranslate.enterCompanyName.tr(),
           errorText: _nameError,
           enabled: !_isSaving,
           textInputAction: TextInputAction.next,
@@ -108,15 +110,17 @@ class _CompanyFormSheetState extends ConsumerState<CompanyFormSheet> {
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: _notesController,
-          label: 'Notes',
-          hint: 'Enter notes (optional)',
+          label: AppTranslate.notes.tr(),
+          hint: AppTranslate.enterNotesOptional.tr(),
           enabled: !_isSaving,
           maxLines: 3,
           minLines: 3,
         ),
         SizedBox(height: AppSpacing.lg.h),
         CustomButton(
-          text: _isEditing ? 'Update Company' : 'Save Company',
+          text: _isEditing
+              ? AppTranslate.updateCompany.tr()
+              : AppTranslate.saveCompany.tr(),
           onPressed: _save,
           loading: _isSaving,
         ),

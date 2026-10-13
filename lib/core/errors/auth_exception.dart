@@ -1,3 +1,6 @@
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 class AuthExceptionCodes {
   const AuthExceptionCodes._();
 
@@ -17,17 +20,17 @@ class AuthException implements Exception {
   String get message {
     switch (code) {
       case AuthExceptionCodes.invalidEmail:
-        return 'The email address is not valid.';
+        return AppTranslate.emailAddressNotValid.tr();
       case AuthExceptionCodes.invalidCredentials:
-        return 'Incorrect email or password. Please try again.';
+        return AppTranslate.incorrectEmailOrPassword.tr();
       case AuthExceptionCodes.userDisabled:
-        return 'This account has been disabled.';
+        return AppTranslate.accountDisabled.tr();
       case AuthExceptionCodes.networkRequestFailed:
-        return 'Network error. Please check your connection and try again.';
+        return AppTranslate.networkError.tr();
       case AuthExceptionCodes.tooManyRequests:
-        return 'Too many attempts. Please wait a moment and try again.';
+        return AppTranslate.tooManyAttempts.tr();
       default:
-        return 'Something went wrong. Please try again.';
+        return AppTranslate.somethingWentWrong.tr();
     }
   }
 }

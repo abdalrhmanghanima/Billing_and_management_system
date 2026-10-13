@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 
@@ -34,6 +35,8 @@ class CustomSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return TextField(
       controller: controller,
       focusNode: focusNode,
@@ -45,7 +48,7 @@ class CustomSearchField extends StatelessWidget {
       textInputAction: textInputAction,
       style: AppTextStyles.bodySmall.copyWith(
         fontSize: AppTextStyles.sizeSm.sp,
-        color: AppColors.neutral800,
+        color: palette.textPrimary,
       ),
       decoration: InputDecoration(
         hintText: hint,
@@ -59,20 +62,20 @@ class CustomSearchField extends StatelessWidget {
           child: Icon(
             Icons.search,
             size: AppDimensions.iconMd.r,
-            color: AppColors.neutral400,
+            color: palette.iconMuted,
           ),
         ),
         prefixIconConstraints: BoxConstraints(minWidth: 38.w, maxWidth: 38.w),
-        border: _border(AppColors.neutral200),
-        enabledBorder: _border(AppColors.neutral200),
-        focusedBorder: _border(AppColors.primary),
+        border: _border(palette.border),
+        enabledBorder: _border(palette.border),
+        focusedBorder: _border(palette.accentText),
         errorBorder: _border(AppColors.error),
         focusedErrorBorder: _border(AppColors.error),
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: palette.inputFill,
         hintStyle: AppTextStyles.bodySmall.copyWith(
           fontSize: AppTextStyles.sizeSm.sp,
-          color: AppColors.neutral400,
+          color: palette.textMuted,
         ),
       ),
     );
@@ -138,12 +141,14 @@ class _FilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Material(
-      color: active ? AppColors.primarySubtle : AppColors.white,
+      color: active ? palette.primarySubtle : palette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg.r),
         side: BorderSide(
-          color: active ? AppColors.primary : AppColors.neutral200,
+          color: active ? palette.accentText : palette.border,
           width: 1.5,
         ),
       ),
@@ -157,7 +162,7 @@ class _FilterButton extends StatelessWidget {
           child: Icon(
             Icons.tune,
             size: AppDimensions.iconMd.r,
-            color: active ? AppColors.primary : AppColors.neutral600,
+            color: active ? palette.accentText : palette.textSecondary,
           ),
         ),
       ),

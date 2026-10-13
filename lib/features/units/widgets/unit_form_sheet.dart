@@ -1,7 +1,9 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/units/entities/unit.dart';
 import 'package:billing_and_sales_management/features/units/providers/units_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +46,7 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
 
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _nameError = 'UNIT NAME is Required');
+      setState(() => _nameError = AppTranslate.unitNameRequired.tr());
       return;
     }
 
@@ -71,18 +73,18 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
         CustomSnackbar.showSuccess(
           context,
           _isEditing
-              ? 'Unit updated successfully.'
-              : 'Unit saved successfully.',
+              ? AppTranslate.unitUpdatedSuccessfully.tr()
+              : AppTranslate.unitSavedSuccessfully.tr(),
         );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
-        setState(() => _nameError = 'UNIT NAME has already existed before');
+        setState(() => _nameError = AppTranslate.unitNameAlreadyExists.tr());
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
           _isEditing
-              ? 'Could not update the unit. Please try again.'
-              : 'Could not save the unit. Please try again.',
+              ? AppTranslate.couldNotUpdateUnit.tr()
+              : AppTranslate.couldNotSaveUnit.tr(),
         );
     }
   }
@@ -95,9 +97,9 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
       children: [
         CustomTextField(
           controller: _nameController,
-          label: 'Unit Name',
+          label: AppTranslate.unitName.tr(),
           isRequired: true,
-          hint: 'Enter unit name (e.g. Piece)',
+          hint: AppTranslate.enterUnitNameExample.tr(),
           errorText: _nameError,
           enabled: !_isSaving,
           textInputAction: TextInputAction.next,
@@ -108,15 +110,17 @@ class _UnitFormSheetState extends ConsumerState<UnitFormSheet> {
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: _notesController,
-          label: 'Notes',
-          hint: 'Enter notes (optional)',
+          label: AppTranslate.notes.tr(),
+          hint: AppTranslate.enterNotesOptional.tr(),
           enabled: !_isSaving,
           maxLines: 3,
           minLines: 3,
         ),
         SizedBox(height: AppSpacing.lg.h),
         CustomButton(
-          text: _isEditing ? 'Update Unit' : 'Save Unit',
+          text: _isEditing
+              ? AppTranslate.updateUnit.tr()
+              : AppTranslate.saveUnit.tr(),
           onPressed: _save,
           loading: _isSaving,
         ),

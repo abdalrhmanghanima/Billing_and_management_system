@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
-import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
@@ -39,7 +39,7 @@ class CustomSectionHeader extends StatelessWidget {
             child: CustomText(
               text: title,
               style: AppTextStyles.sectionTitle,
-              color: AppColors.neutral900,
+              color: context.palette.textPrimary,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -55,7 +55,7 @@ class CustomSectionHeader extends StatelessWidget {
                 child: CustomText(
                   text: actionLabel!,
                   style: AppTextStyles.label,
-                  color: AppColors.primary,
+                  color: context.palette.accentText,
                 ),
               ),
             ),

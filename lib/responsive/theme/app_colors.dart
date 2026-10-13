@@ -106,27 +106,78 @@ class AppColors {
   static const Color disabled = neutral300;
 
   // ---------------------------------------------------------------------
-  // Dark palette (used by AppTheme.dark)
+  // Dark palette (used by AppTheme.dark) - professional black/charcoal.
   // ---------------------------------------------------------------------
 
-  /// Dark page background (design canvas `#0B1520`).
-  static const Color darkBackground = Color(0xFF0B1520);
+  /// Dark page background (near-black `#090909`).
+  static const Color darkBackground = Color(0xFF090909);
 
-  /// Dark raised surfaces.
-  static const Color darkSurface = neutral900;
+  /// Dark secondary background (bars, sheets `#101010`).
+  static const Color darkSurface = Color(0xFF101010);
 
-  /// Dark card backgrounds.
-  static const Color darkCard = neutral800;
+  /// Dark card / elevated surface (`#171717`).
+  static const Color darkCard = Color(0xFF171717);
 
-  /// Dark borders and dividers.
-  static const Color darkBorder = neutral700;
+  /// Dark deepest surface (dialogs, lowest elevation `#050505`).
+  static const Color darkBackgroundDeep = Color(0xFF050505);
 
-  /// Dark primary text.
-  static const Color darkTextPrimary = neutral100;
+  /// Dark selected / hovered surface (`#242424`).
+  static const Color darkHover = Color(0xFF242424);
 
-  /// Dark secondary text.
-  static const Color darkTextSecondary = neutral300;
+  /// Dark high surface (`#2E2E2E`).
+  static const Color darkHoverHigh = Color(0xFF2E2E2E);
 
-  /// Dark muted text.
-  static const Color darkTextMuted = neutral400;
+  /// Dark standard border / divider (`#303030`).
+  static const Color darkBorder = Color(0xFF303030);
+
+  /// Dark subtle border (`#252525`).
+  static const Color darkSubtleBorder = Color(0xFF252525);
+
+  /// Dark primary text (`#F5F5F5`).
+  static const Color darkTextPrimary = Color(0xFFF5F5F5);
+
+  /// Dark strong headings (`#FFFFFF`).
+  static const Color darkTextStrong = Color(0xFFFFFFFF);
+
+  /// Dark secondary text (`#B8B8B8`).
+  static const Color darkTextSecondary = Color(0xFFB8B8B8);
+
+  /// Dark muted text (`#909090`).
+  static const Color darkTextMuted = Color(0xFF909090);
+
+  /// Dark disabled text (`#737373`).
+  static const Color darkTextDisabled = Color(0xFF737373);
+
+  /// Dark disabled surface (`#3A3A3A`).
+  static const Color darkDisabled = Color(0xFF3A3A3A);
+
+  /// Dark brand accent text (cyan, readable on charcoal `#3EB8E8`).
+  static const Color darkAccentText = Color(0xFF3EB8E8);
+
+  /// Dark subtle brand / semantic containers.
+  static const Color darkPrimarySubtle = Color(0xFF102630);
+  static const Color darkCyanLight = Color(0xFF0C2730);
+  static const Color darkCyanText = Color(0xFF3EB8E8);
+  static const Color darkCoralSubtle = Color(0xFF2B1A14);
+  static const Color darkCoralBorder = Color(0xFF553021);
+  static const Color darkPurpleSubtle = Color(0xFF242424);
+  static const Color darkPurpleText = Color(0xFFD0B7FF);
+
+  /// Dark semantic feedback containers.
+  static const Color darkSuccessBg = Color(0xFF0C2420);
+  static const Color darkSuccessBorder = Color(0xFF1C4C3C);
+  static const Color darkSuccessText = Color(0xFF6EE7B7);
+  static const Color darkWarningBg = Color(0xFF2A2110);
+  static const Color darkWarningBorder = Color(0xFF6B5220);
+  static const Color darkWarningText = Color(0xFFFCD34D);
+  static const Color darkErrorBg = Color(0xFF2B1517);
+  static const Color darkErrorBorder = Color(0xFF6F3030);
+  static const Color darkErrorText = Color(0xFFFCA5A5);
+  static const Color darkInfoBg = Color(0xFF0B2430);
+  static const Color darkInfoBorder = Color(0xFF1A4A63);
+
+  /// Dark inset surfaces, handles and subtle fills.
+  static const Color darkInset = Color(0xFF1D1D1D);
+  static const Color darkHandle = Color(0xFF525252);
+  static const Color darkSubtleSurface = darkHover;
 }

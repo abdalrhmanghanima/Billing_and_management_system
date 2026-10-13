@@ -1,4 +1,5 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/clients/entities/client.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/invoice_line.dart';
 import 'package:billing_and_sales_management/domain/invoices/entities/sales_invoice.dart';
@@ -9,6 +10,7 @@ import 'package:billing_and_sales_management/features/invoices/providers/invoice
 import 'package:billing_and_sales_management/features/invoices/screens/invoice_details_screen.dart';
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -143,7 +145,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     final client = _selectedClient;
 
     setState(
-      () => _clientError = client == null ? 'CLIENT NAME is Required' : null,
+      () => _clientError = client == null
+          ? AppTranslate.clientNameRequired.tr()
+          : null,
     );
 
     if (client == null) return;
@@ -203,27 +207,27 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     String? sellingPriceError;
     if (sellingPriceText.isNotEmpty &&
         !_numberRegex.hasMatch(sellingPriceText)) {
-      sellingPriceError = 'Invalid number';
+      sellingPriceError = AppTranslate.invalidNumber.tr();
     } else if (sellingPriceText.isNotEmpty &&
         (double.tryParse(sellingPriceText) ?? 0) < 0) {
-      sellingPriceError = 'SELLING PRICE Must be Greater than or equal Zero';
+      sellingPriceError = AppTranslate.sellingPriceInvalid.tr();
     }
 
     String? discountError;
     if (discountText.isNotEmpty) {
       if (!_numberRegex.hasMatch(discountText)) {
-        discountError = 'Invalid number';
+        discountError = AppTranslate.invalidNumber.tr();
       } else if ((double.tryParse(discountText) ?? 0) < 0) {
-        discountError = 'Discount Must be Greater than or equal Zero';
+        discountError = AppTranslate.discountInvalid.tr();
       }
     }
 
     setState(() {
-      _itemError = itemInvalid ? 'ITEM NAME is Required' : null;
+      _itemError = itemInvalid ? AppTranslate.itemNameRequired.tr() : null;
       _quantityError = quantityEmpty
-          ? 'Quantity is Required'
+          ? AppTranslate.quantityRequired.tr()
           : quantityInvalid
-          ? 'Quantity Must be Greater than Zero'
+          ? AppTranslate.quantityGreaterThanZero.tr()
           : null;
       _sellingPriceError = sellingPriceError;
       _discountError = discountError;
@@ -266,12 +270,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       _resetAddItemForm();
     });
 
-    CustomSnackbar.showSuccess(context, 'Added "${item.name}" to invoice');
+    CustomSnackbar.showSuccess(
+      context,
+      AppTranslate.itemAddedToInvoice.tr(namedArgs: {'name': item.name}),
+    );
   }
 
   void _removeLine(int index) {
     setState(() => _lines.removeAt(index));
-    CustomSnackbar.showInfo(context, 'Item removed from invoice');
+    CustomSnackbar.showInfo(context, AppTranslate.itemRemovedFromInvoice.tr());
   }
 
   bool _validateSummary() {
@@ -282,28 +289,27 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
     String? percentageError;
     if (percentageText.isNotEmpty) {
       if (!_numberRegex.hasMatch(percentageText)) {
-        percentageError = 'Invalid number';
+        percentageError = AppTranslate.invalidNumber.tr();
       } else if ((double.tryParse(percentageText) ?? 0) < 0) {
-        percentageError =
-            'Percentage discount Must be Greater than or equal Zero';
+        percentageError = AppTranslate.percentageDiscountInvalid.tr();
       }
     }
 
     String? valueError;
     if (valueText.isNotEmpty) {
       if (!_numberRegex.hasMatch(valueText)) {
-        valueError = 'Invalid number';
+        valueError = AppTranslate.invalidNumber.tr();
       } else if ((double.tryParse(valueText) ?? 0) < 0) {
-        valueError = 'Value discount Must be Greater than or equal Zero';
+        valueError = AppTranslate.valueDiscountInvalid.tr();
       }
     }
 
     String? paidUpError;
     if (paidUpText.isNotEmpty) {
       if (!_numberRegex.hasMatch(paidUpText)) {
-        paidUpError = 'Invalid number';
+        paidUpError = AppTranslate.invalidNumber.tr();
       } else if ((double.tryParse(paidUpText) ?? 0) < 0) {
-        paidUpError = 'Paid Up Must be Greater than or equal Zero';
+        paidUpError = AppTranslate.paidUpInvalid.tr();
       }
     }
 
@@ -323,7 +329,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     final client = _selectedClient;
     if (client == null) {
-      setState(() => _clientError = 'CLIENT NAME is Required');
+      setState(() => _clientError = AppTranslate.clientNameRequired.tr());
       return;
     }
 
@@ -349,7 +355,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
       final invoice = outcome.invoice!;
       CustomSnackbar.showSuccess(
         context,
-        'Sales Invoice #${invoice.billNumber} created successfully!',
+        AppTranslate.salesInvoiceCreatedSuccessfully.tr(
+          namedArgs: {'number': invoice.billNumber.toString()},
+        ),
       );
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(
@@ -357,17 +365,16 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         ),
       );
     } else {
-      CustomSnackbar.showError(
-        context,
-        'Could not save the invoice. Please try again.',
-      );
+      CustomSnackbar.showError(context, AppTranslate.couldNotSaveInvoice.tr());
     }
   }
 
   String get _stepSubtitle {
-    if (_step == 1) return 'Step 1: Bill Details';
-    if (_step == 3) return 'Step 3: Summary';
-    return _addingItem ? 'Step 2: Add Item' : 'Step 2: Items List';
+    if (_step == 1) return AppTranslate.step1BillDetails.tr();
+    if (_step == 3) return AppTranslate.step3Summary.tr();
+    return _addingItem
+        ? AppTranslate.step2AddItem.tr()
+        : AppTranslate.step2ItemsList.tr();
   }
 
   @override
@@ -376,14 +383,13 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         .watch(nextBillNumberProvider)
         .maybeWhen(
           data: (number) => '#$number',
-          error: (_, _) => 'Auto generated',
-          orElse: () => 'Generating...',
+          error: (_, _) => AppTranslate.autoGenerated.tr(),
+          orElse: () => AppTranslate.generating.tr(),
         );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       appBar: CustomAppBar(
-        title: 'New Invoice',
+        title: AppTranslate.newInvoice.tr(),
         subtitle: _stepSubtitle,
         showBackArrow: false,
         leading: IconButton(
@@ -391,7 +397,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           style: IconButton.styleFrom(
             backgroundColor: Colors.transparent,
-            foregroundColor: AppColors.neutral700,
+            foregroundColor: context.palette.textSecondary,
             minimumSize: Size(
               AppDimensions.headerActionSize.w,
               AppDimensions.headerActionSize.w,
@@ -437,20 +443,19 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     return clientsState.when(
       loading: () =>
-          const Center(child: CustomLoading(color: AppColors.primary)),
+          Center(child: CustomLoading(color: context.palette.accentText)),
       error: (error, _) => CustomErrorState(
-        title: 'Could not load clients',
+        title: AppTranslate.couldNotLoadClients.tr(),
         onRetry: () => ref.read(clientsProvider.notifier).refresh(),
       ),
       data: (clients) {
         if (clients.isEmpty) {
-          return const CustomEmptyState(
+          return CustomEmptyState(
             icon: Icons.people_outline,
-            iconColor: AppColors.cyanDark,
-            iconBackgroundColor: AppColors.cyanLight,
-            title: 'No Clients Available',
-            message:
-                'Add a client first before creating invoices. Invoices must belong to a client.',
+            iconColor: context.palette.cyanText,
+            iconBackgroundColor: context.palette.cyanLight,
+            title: AppTranslate.noClientsAvailable.tr(),
+            message: AppTranslate.addClientFirstBeforeInvoicesMessage.tr(),
           );
         }
 
@@ -463,9 +468,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             children: [
               CustomTextField(
                 controller: _billDateController,
-                label: 'Bill Date',
+                label: AppTranslate.billDate.tr(),
                 isRequired: true,
-                hint: 'yyyy-MM-dd',
+                hint: AppTranslate.dateFormatHint.tr(),
                 prefixIcon: const Icon(Icons.calendar_today_outlined),
                 enabled: !_isSaving,
                 readOnly: true,
@@ -475,14 +480,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               CustomTextField(
                 key: ValueKey<String>(nextBillNumber),
                 initialValue: nextBillNumber,
-                label: 'Bill Number (Auto)',
+                label: AppTranslate.billNumberAuto.tr(),
                 enabled: false,
               ),
               SizedBox(height: AppSpacing.formGroupGap.h),
               CustomDropdown<Client>(
-                label: 'Client Name',
+                label: AppTranslate.clientName.tr(),
                 isRequired: true,
-                hint: 'Select client',
+                hint: AppTranslate.selectClient.tr(),
                 options: clients,
                 value: _selectedClient,
                 labelOf: (client) => client.name,
@@ -524,13 +529,15 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             children: [
               Expanded(
                 child: CustomText(
-                  text: 'Invoice Items (${_lines.length})',
+                  text: AppTranslate.invoiceItemsCount.tr(
+                    namedArgs: {'count': _lines.length.toString()},
+                  ),
                   style: AppTextStyles.sectionTitle,
-                  color: AppColors.neutral900,
+                  color: context.palette.textPrimary,
                 ),
               ),
               CustomButton(
-                text: '+ Add Item',
+                text: AppTranslate.plusAddItem.tr(),
                 variant: CustomButtonVariant.outline,
                 size: CustomButtonSize.small,
                 width: 110.w,
@@ -545,12 +552,12 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             child: _lines.isEmpty
                 ? CustomEmptyState(
                     icon: Icons.inventory_2_outlined,
-                    iconColor: AppColors.primary,
-                    iconBackgroundColor: AppColors.primarySubtle,
-                    title: 'No Items Added',
-                    message: 'Add items to calculate invoice totals.',
+                    iconColor: context.palette.accentText,
+                    iconBackgroundColor: context.palette.primarySubtle,
+                    title: AppTranslate.noItemsAdded.tr(),
+                    message: AppTranslate.addItemsToCalculateTotalsMessage.tr(),
                     action: CustomButton(
-                      text: '+ Add Item',
+                      text: AppTranslate.plusAddItem.tr(),
                       size: CustomButtonSize.small,
                       width: 200.w,
                       onPressed: () => setState(() => _addingItem = true),
@@ -580,20 +587,19 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     return itemsState.when(
       loading: () =>
-          const Center(child: CustomLoading(color: AppColors.primary)),
+          Center(child: CustomLoading(color: context.palette.accentText)),
       error: (error, _) => CustomErrorState(
-        title: 'Could not load items',
+        title: AppTranslate.couldNotLoadItems.tr(),
         onRetry: () => ref.read(itemsProvider.notifier).refresh(),
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const CustomEmptyState(
+          return CustomEmptyState(
             icon: Icons.inventory_2_outlined,
-            iconColor: AppColors.primary,
-            iconBackgroundColor: AppColors.primarySubtle,
-            title: 'No Items Available',
-            message:
-                'Add an item first before creating invoices. Invoice lines must reference catalog items.',
+            iconColor: context.palette.accentText,
+            iconBackgroundColor: context.palette.primarySubtle,
+            title: AppTranslate.noItemsAvailable.tr(),
+            message: AppTranslate.addItemFirstBeforeInvoicesMessage.tr(),
           );
         }
 
@@ -612,9 +618,9 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CustomDropdown<Item>(
-                label: 'Item Name',
+                label: AppTranslate.itemName.tr(),
                 isRequired: true,
-                hint: 'Select item',
+                hint: AppTranslate.selectItem.tr(),
                 options: items,
                 value: _selectedItem,
                 labelOf: (item) => item.name,
@@ -637,7 +643,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               SizedBox(height: AppSpacing.formGroupGap.h),
               CustomTextField(
                 controller: _sellingPriceController,
-                label: 'Selling Price',
+                label: AppTranslate.sellingPrice.tr(),
                 hint: '0.00',
                 errorText: _sellingPriceError,
                 enabled: !_isSaving,
@@ -652,7 +658,10 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
                 },
               ),
               SizedBox(height: AppSpacing.formGroupGap.h),
-              CustomFieldLabel(label: 'Quantity', isRequired: true),
+              CustomFieldLabel(
+                label: AppTranslate.quantity.tr(),
+                isRequired: true,
+              ),
               SizedBox(height: AppSpacing.xs.h),
               Row(
                 children: [
@@ -705,7 +714,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               SizedBox(height: AppSpacing.formGroupGap.h),
               CustomTextField(
                 controller: _discountController,
-                label: 'Discount',
+                label: AppTranslate.discount.tr(),
                 hint: '0',
                 errorText: _discountError,
                 enabled: !_isSaving,
@@ -723,7 +732,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
               CustomTextField(
                 key: ValueKey<String>(lineTotal.toStringAsFixed(2)),
                 initialValue: lineTotal.toStringAsFixed(2),
-                label: 'Total',
+                label: AppTranslate.total.tr(),
                 enabled: false,
               ),
             ],
@@ -745,14 +754,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _SummaryRow(
-              label: 'Bills Total',
+              label: AppTranslate.billsTotal.tr(),
               value: _formatAmount(_billsTotal),
               emphasized: false,
             ),
             SizedBox(height: AppSpacing.md.h),
             CustomTextField(
               controller: _percentageDiscountController,
-              label: 'Percentage Discount (%)',
+              label: AppTranslate.percentageDiscountPercent.tr(),
               hint: '0',
               errorText: _percentageDiscountError,
               enabled: !_isSaving,
@@ -771,7 +780,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             SizedBox(height: AppSpacing.formGroupGap.h),
             CustomTextField(
               controller: _valueDiscountController,
-              label: 'Value Discount',
+              label: AppTranslate.valueDiscount.tr(),
               hint: '0',
               errorText: _valueDiscountError,
               enabled: !_isSaving,
@@ -789,14 +798,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             ),
             SizedBox(height: AppSpacing.md.h),
             _SummaryRow(
-              label: 'The Net',
+              label: AppTranslate.theNet.tr(),
               value: _formatAmount(theNet),
               emphasized: true,
             ),
             SizedBox(height: AppSpacing.md.h),
             CustomTextField(
               controller: _paidUpController,
-              label: 'Paid Up',
+              label: AppTranslate.paidUp.tr(),
               hint: '0',
               errorText: _paidUpError,
               enabled: !_isSaving,
@@ -812,7 +821,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             ),
             SizedBox(height: AppSpacing.md.h),
             _SummaryRow(
-              label: 'The Rest',
+              label: AppTranslate.theRest.tr(),
               value: _formatAmount(theRest),
               coral: true,
             ),
@@ -827,14 +836,14 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
 
     if (_step == 1) {
       bar = CustomButton(
-        text: 'Next',
+        text: AppTranslate.next.tr(),
         onPressed: _isSaving ? null : _goToNextFromDetails,
         loading: _isSaving,
       );
     } else if (_step == 2) {
       if (_addingItem) {
         bar = CustomButton(
-          text: 'Add to Invoice',
+          text: AppTranslate.addToInvoice.tr(),
           onPressed: _isSaving ? null : _addLine,
           loading: _isSaving,
         );
@@ -843,7 +852,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           children: [
             Expanded(
               child: CustomButton(
-                text: 'Back',
+                text: AppTranslate.back.tr(),
                 variant: CustomButtonVariant.secondary,
                 onPressed: _isSaving ? null : () => setState(() => _step = 1),
               ),
@@ -851,7 +860,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
             SizedBox(width: AppSpacing.md.w),
             Expanded(
               child: CustomButton(
-                text: 'Next',
+                text: AppTranslate.next.tr(),
                 onPressed: _isSaving || _lines.isEmpty
                     ? null
                     : () => setState(() => _step = 3),
@@ -865,7 +874,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
         children: [
           Expanded(
             child: CustomButton(
-              text: 'Back',
+              text: AppTranslate.back.tr(),
               variant: CustomButtonVariant.secondary,
               onPressed: _isSaving ? null : () => setState(() => _step = 2),
             ),
@@ -873,7 +882,7 @@ class _CreateInvoiceScreenState extends ConsumerState<CreateInvoiceScreen> {
           SizedBox(width: AppSpacing.md.w),
           Expanded(
             child: CustomButton(
-              text: 'Create Invoice',
+              text: AppTranslate.createInvoice.tr(),
               onPressed: _isSaving || _lines.isEmpty ? null : _createInvoice,
               loading: _isSaving,
             ),
@@ -896,24 +905,38 @@ class _InvoiceStepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.lg.w,
         vertical: AppSpacing.md.h,
       ),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(AppDimensions.radiusLg.r),
-        border: Border.all(color: AppColors.neutral200),
+        border: Border.all(color: palette.border),
         boxShadow: AppShadows.xs,
       ),
       child: Row(
         children: [
-          _StepItem(stepNumber: 1, label: 'Bill Details', state: _stepState(1)),
+          _StepItem(
+            stepNumber: 1,
+            label: AppTranslate.billDetails.tr(),
+            state: _stepState(1),
+          ),
           _StepConnector(active: currentStep > 1),
-          _StepItem(stepNumber: 2, label: 'Items', state: _stepState(2)),
+          _StepItem(
+            stepNumber: 2,
+            label: AppTranslate.items.tr(),
+            state: _stepState(2),
+          ),
           _StepConnector(active: currentStep > 2),
-          _StepItem(stepNumber: 3, label: 'Summary', state: _stepState(3)),
+          _StepItem(
+            stepNumber: 3,
+            label: AppTranslate.summary.tr(),
+            state: _stepState(3),
+          ),
         ],
       ),
     );
@@ -941,6 +964,8 @@ class _StepItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     Color circleBackground;
     Color circleForeground;
     BoxBorder? ring;
@@ -955,8 +980,8 @@ class _StepItem extends StatelessWidget {
         circleForeground = AppColors.white;
         ring = Border.all(color: AppColors.primary, width: 3);
       case _StepVisualState.upcoming:
-        circleBackground = AppColors.neutral200;
-        circleForeground = AppColors.neutral600;
+        circleBackground = palette.border;
+        circleForeground = palette.iconMuted;
         ring = null;
     }
 
@@ -990,8 +1015,8 @@ class _StepItem extends StatelessWidget {
             text: label,
             style: AppTextStyles.microLabel,
             color: state == _StepVisualState.upcoming
-                ? AppColors.neutral400
-                : AppColors.neutral700,
+                ? palette.iconMuted
+                : palette.textStrong,
             maxLines: 1,
           ),
         ],
@@ -1011,7 +1036,7 @@ class _StepConnector extends StatelessWidget {
       child: Container(
         height: 2,
         margin: EdgeInsets.only(bottom: AppSpacing.lg.h),
-        color: active ? AppColors.primary : AppColors.neutral200,
+        color: active ? context.palette.accentText : context.palette.border,
       ),
     );
   }
@@ -1026,12 +1051,13 @@ class _StepperButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
+    final palette = context.palette;
 
     return Material(
-      color: AppColors.white,
+      color: palette.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppDimensions.radiusMd.r),
-        side: const BorderSide(color: AppColors.neutral200),
+        side: BorderSide(color: palette.border),
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -1042,7 +1068,7 @@ class _StepperButton extends StatelessWidget {
           child: Icon(
             icon,
             size: AppDimensions.iconSm.r,
-            color: enabled ? AppColors.neutral700 : AppColors.neutral400,
+            color: enabled ? palette.textStrong : palette.iconMuted,
           ),
         ),
       ),
@@ -1065,6 +1091,8 @@ class _InvoiceLineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return CustomCard(
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       child: Column(
@@ -1077,7 +1105,7 @@ class _InvoiceLineCard extends StatelessWidget {
                 child: CustomText(
                   text: line.itemName,
                   style: AppTextStyles.cardTitle,
-                  color: AppColors.neutral900,
+                  color: palette.textPrimary,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -1088,7 +1116,7 @@ class _InvoiceLineCard extends StatelessWidget {
                 height: AppDimensions.iconButtonSize.w,
                 child: IconButton(
                   onPressed: onDelete,
-                  tooltip: 'Delete',
+                  tooltip: AppTranslate.delete.tr(),
                   padding: EdgeInsets.zero,
                   icon: Icon(
                     Icons.delete_outline,
@@ -1102,8 +1130,8 @@ class _InvoiceLineCard extends StatelessWidget {
           SizedBox(height: AppSpacing.xs.h),
           Container(
             padding: EdgeInsets.only(top: AppSpacing.xs.h),
-            decoration: const BoxDecoration(
-              border: Border(top: BorderSide(color: AppColors.neutral200)),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: palette.border)),
             ),
             child: Row(
               children: [
@@ -1112,14 +1140,14 @@ class _InvoiceLineCard extends StatelessWidget {
                     text:
                         '${_formatQuantity(line.quantity)} × ${DashboardAmountFormatter.format(line.sellingPrice)}',
                     style: AppTextStyles.bodySmall,
-                    color: AppColors.neutral500,
+                    color: palette.textMuted,
                   ),
                 ),
                 CustomText(
                   text: DashboardAmountFormatter.format(line.total),
                   style: AppTextStyles.label,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: palette.accentText,
                 ),
               ],
             ),
@@ -1145,13 +1173,15 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     if (coral) {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: AppColors.coralSubtle,
+          color: palette.coralSubtle,
           borderRadius: BorderRadius.circular(AppDimensions.radiusLg.r),
-          border: Border.all(color: AppColors.coral.withValues(alpha: 0.35)),
+          border: Border.all(color: palette.coralBorder),
         ),
         child: Row(
           children: [
@@ -1159,13 +1189,13 @@ class _SummaryRow extends StatelessWidget {
               child: CustomText(
                 text: label,
                 style: AppTextStyles.sectionTitle,
-                color: AppColors.coral,
+                color: palette.coralText,
               ),
             ),
             CustomText(
               text: value,
               style: AppTextStyles.amount,
-              color: AppColors.coral,
+              color: palette.coralText,
             ),
           ],
         ),
@@ -1176,7 +1206,7 @@ class _SummaryRow extends StatelessWidget {
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: AppColors.primarySubtle,
+          color: palette.primarySubtle,
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd.r),
         ),
         child: Row(
@@ -1185,13 +1215,13 @@ class _SummaryRow extends StatelessWidget {
               child: CustomText(
                 text: label,
                 style: AppTextStyles.sectionTitle,
-                color: AppColors.primary,
+                color: palette.accentText,
               ),
             ),
             CustomText(
               text: value,
               style: AppTextStyles.sectionTitle,
-              color: AppColors.primary,
+              color: palette.accentText,
             ),
           ],
         ),
@@ -1204,13 +1234,13 @@ class _SummaryRow extends StatelessWidget {
           child: CustomText(
             text: label,
             style: AppTextStyles.bodyMedium,
-            color: AppColors.neutral600,
+            color: palette.textSecondary,
           ),
         ),
         CustomText(
           text: value,
           style: AppTextStyles.bodyStrong,
-          color: AppColors.neutral900,
+          color: palette.textPrimary,
         ),
       ],
     );

@@ -1,4 +1,5 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/companies/entities/company.dart';
 import 'package:billing_and_sales_management/domain/items/entities/item.dart';
 import 'package:billing_and_sales_management/domain/types/entities/item_type.dart';
@@ -6,6 +7,7 @@ import 'package:billing_and_sales_management/features/companies/providers/compan
 import 'package:billing_and_sales_management/features/items/providers/items_notifier.dart';
 import 'package:billing_and_sales_management/features/types/providers/types_notifier.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -78,15 +80,14 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
 
     setState(() {
       _sellingPriceError = (sellingPrice == null || sellingPrice < 0)
-          ? 'SELLING PRICE Must be Greater than or equal Zero'
+          ? AppTranslate.sellingPriceInvalid.tr()
           : null;
       if (buyingPrice == null || buyingPrice < 0) {
-        _buyingPriceError = 'BUYING PRICE Must be Greater than or equal Zero';
+        _buyingPriceError = AppTranslate.buyingPriceInvalid.tr();
       } else if (sellingPrice != null &&
           sellingPrice >= 0 &&
           buyingPrice > sellingPrice) {
-        _buyingPriceError =
-            'BUYING PRICE Must be less than or equal SELLING PRICE';
+        _buyingPriceError = AppTranslate.buyingPriceExceedsSelling.tr();
       } else {
         _buyingPriceError = null;
       }
@@ -110,9 +111,11 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
 
     if (companyInvalid || typeInvalid || nameInvalid || !pricesValid) {
       setState(() {
-        _companyError = companyInvalid ? 'COMPANY NAME is Required' : null;
-        _typeError = typeInvalid ? 'TYPE NAME is Required' : null;
-        _nameError = nameInvalid ? 'ITEM NAME is Required' : null;
+        _companyError = companyInvalid
+            ? AppTranslate.companyNameRequired.tr()
+            : null;
+        _typeError = typeInvalid ? AppTranslate.typeNameRequired.tr() : null;
+        _nameError = nameInvalid ? AppTranslate.itemNameRequired.tr() : null;
       });
       return;
     }
@@ -160,18 +163,18 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
         CustomSnackbar.showSuccess(
           context,
           _isEditing
-              ? 'Item updated successfully.'
-              : 'Item saved successfully.',
+              ? AppTranslate.itemUpdatedSuccessfully.tr()
+              : AppTranslate.itemSavedSuccessfully.tr(),
         );
         Navigator.of(context).pop();
       case SaveResult.duplicate:
-        setState(() => _nameError = 'ITEM NAME has already existed before');
+        setState(() => _nameError = AppTranslate.itemNameAlreadyExists.tr());
       case SaveResult.failure:
         CustomSnackbar.showError(
           context,
           _isEditing
-              ? 'Could not update the item. Please try again.'
-              : 'Could not save the item. Please try again.',
+              ? AppTranslate.couldNotUpdateItem.tr()
+              : AppTranslate.couldNotSaveItem.tr(),
         );
     }
   }
@@ -182,50 +185,50 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
     final typesState = ref.watch(typesProvider);
 
     return companiesState.when(
-      loading: () => const SizedBox(
+      loading: () => SizedBox(
         height: 160,
-        child: Center(child: CustomLoading(color: AppColors.primary)),
+        child: Center(child: CustomLoading(color: context.palette.accentText)),
       ),
       error: (error, _) => SizedBox(
         height: 160,
         child: CustomErrorState(
-          title: 'Could not load companies',
+          title: AppTranslate.couldNotLoadCompanies.tr(),
           onRetry: () => ref.read(companiesProvider.notifier).refresh(),
         ),
       ),
       data: (companies) {
         if (companies.isEmpty) {
-          return const CustomEmptyState(
+          return CustomEmptyState(
             icon: Icons.business_outlined,
-            iconColor: AppColors.cyanDark,
-            iconBackgroundColor: AppColors.cyanLight,
-            title: 'No Companies Available',
-            message:
-                'Add a company first before creating items. Items must belong to a company.',
+            iconColor: context.palette.cyanText,
+            iconBackgroundColor: context.palette.cyanLight,
+            title: AppTranslate.noCompaniesAvailable.tr(),
+            message: AppTranslate.addCompanyFirstBeforeItemsMessage.tr(),
           );
         }
 
         return typesState.when(
-          loading: () => const SizedBox(
+          loading: () => SizedBox(
             height: 160,
-            child: Center(child: CustomLoading(color: AppColors.primary)),
+            child: Center(
+              child: CustomLoading(color: context.palette.accentText),
+            ),
           ),
           error: (error, _) => SizedBox(
             height: 160,
             child: CustomErrorState(
-              title: 'Could not load types',
+              title: AppTranslate.couldNotLoadTypes.tr(),
               onRetry: () => ref.read(typesProvider.notifier).refresh(),
             ),
           ),
           data: (types) {
             if (types.isEmpty) {
-              return const CustomEmptyState(
+              return CustomEmptyState(
                 icon: Icons.description_outlined,
-                iconColor: AppColors.primary,
-                iconBackgroundColor: AppColors.primarySubtle,
-                title: 'No Types Available',
-                message:
-                    'Add a type first before creating items. Items must have a type.',
+                iconColor: context.palette.accentText,
+                iconBackgroundColor: context.palette.primarySubtle,
+                title: AppTranslate.noTypesAvailable.tr(),
+                message: AppTranslate.addTypeFirstBeforeItemsMessage.tr(),
               );
             }
 
@@ -260,9 +263,9 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           CustomDropdown<Company>(
-            label: 'Company',
+            label: AppTranslate.company.tr(),
             isRequired: true,
-            hint: 'Select company',
+            hint: AppTranslate.selectCompany.tr(),
             options: companies,
             value: _selectedCompany,
             labelOf: (company) => company.name,
@@ -284,11 +287,11 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
           ],
           SizedBox(height: AppSpacing.formGroupGap.h),
           CustomDropdown<ItemType>(
-            label: 'Type',
+            label: AppTranslate.type.tr(),
             isRequired: true,
             hint: _selectedCompany == null
-                ? 'Select company first'
-                : 'Select type',
+                ? AppTranslate.selectCompanyFirst.tr()
+                : AppTranslate.selectType.tr(),
             options: filteredTypes,
             value: _selectedType,
             labelOf: (type) => type.name,
@@ -316,9 +319,9 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
           SizedBox(height: AppSpacing.formGroupGap.h),
           CustomTextField(
             controller: _nameController,
-            label: 'Item Name',
+            label: AppTranslate.itemName.tr(),
             isRequired: true,
-            hint: 'Enter item name',
+            hint: AppTranslate.enterItemName.tr(),
             errorText: _nameError,
             enabled: !_isSaving,
             textInputAction: TextInputAction.next,
@@ -332,7 +335,7 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _sellingPriceController,
-                  label: 'Selling Price',
+                  label: AppTranslate.sellingPrice.tr(),
                   isRequired: true,
                   hint: '0.00',
                   errorText: _sellingPriceError,
@@ -352,7 +355,7 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
               Expanded(
                 child: CustomTextField(
                   controller: _buyingPriceController,
-                  label: 'Buying Price',
+                  label: AppTranslate.buyingPrice.tr(),
                   isRequired: true,
                   hint: '0.00',
                   errorText: _buyingPriceError,
@@ -373,15 +376,17 @@ class _ItemFormSheetState extends ConsumerState<ItemFormSheet> {
           SizedBox(height: AppSpacing.formGroupGap.h),
           CustomTextField(
             controller: _notesController,
-            label: 'Notes',
-            hint: 'Enter notes (optional)',
+            label: AppTranslate.notes.tr(),
+            hint: AppTranslate.enterNotesOptional.tr(),
             enabled: !_isSaving,
             maxLines: 3,
             minLines: 3,
           ),
           SizedBox(height: AppSpacing.lg.h),
           CustomButton(
-            text: _isEditing ? 'Update Item' : 'Save Item',
+            text: _isEditing
+                ? AppTranslate.updateItem.tr()
+                : AppTranslate.saveItem.tr(),
             onPressed: _save,
             loading: _isSaving,
           ),

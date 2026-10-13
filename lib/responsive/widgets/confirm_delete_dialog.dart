@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/responsive/core/responsive_extensions.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_colors.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_dimensions.dart';
+import 'package:billing_and_sales_management/responsive/theme/app_palette.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_spacing.dart';
 import 'package:billing_and_sales_management/responsive/theme/app_text_styles.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_button.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_dialog.dart';
 import 'package:billing_and_sales_management/responsive/widgets/custom_text.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Opens the destructive-action confirmation dialog (`.modal` from the design)
 /// and resolves to `true` only when the user taps the confirm button.
@@ -17,16 +20,16 @@ Future<bool> showConfirmDeleteDialog({
   required BuildContext context,
   required String title,
   required String message,
-  String confirmText = 'Delete',
-  String cancelText = 'Cancel',
+  String? confirmText,
+  String? cancelText,
 }) async {
   final confirmed = await showResponsiveDialog<bool>(
     context: context,
     builder: (dialogContext) => _ConfirmDeleteContent(
       title: title,
       message: message,
-      confirmText: confirmText,
-      cancelText: cancelText,
+      confirmText: confirmText ?? AppTranslate.delete.tr(),
+      cancelText: cancelText ?? AppTranslate.cancel.tr(),
       onConfirm: () => Navigator.of(dialogContext).pop(true),
       onCancel: () => Navigator.of(dialogContext).pop(false),
     ),
@@ -54,6 +57,8 @@ class _ConfirmDeleteContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,8 +67,8 @@ class _ConfirmDeleteContent extends StatelessWidget {
           child: Container(
             width: AppDimensions.emptyStateIconBox.r,
             height: AppDimensions.emptyStateIconBox.r,
-            decoration: const BoxDecoration(
-              color: AppColors.errorBg,
+            decoration: BoxDecoration(
+              color: palette.errorBg,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
@@ -78,14 +83,14 @@ class _ConfirmDeleteContent extends StatelessWidget {
         CustomText(
           text: title,
           style: AppTextStyles.sectionTitle,
-          color: AppColors.neutral900,
+          color: palette.textPrimary,
           textAlign: TextAlign.center,
         ),
         SizedBox(height: AppSpacing.sm.h),
         CustomText(
           text: message,
           style: AppTextStyles.bodySmall,
-          color: AppColors.neutral500,
+          color: palette.textMuted,
           textAlign: TextAlign.center,
         ),
         SizedBox(height: AppSpacing.lg.h),
