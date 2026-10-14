@@ -40,6 +40,8 @@ dependencies:
   flutter_riverpod: ^2.6.1
   shared_preferences: ^2.5.5
   easy_localization: ^3.0.8
+  pdf: ^3.13.1
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_test:
@@ -89,6 +91,12 @@ flutter:
           weight: 700
         - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
           weight: 800
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

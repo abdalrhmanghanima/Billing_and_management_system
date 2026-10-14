@@ -3,6 +3,7 @@ import 'package:billing_and_sales_management/core/errors/client_exception.dart';
 import 'package:billing_and_sales_management/core/translate/app_translate.dart';
 import 'package:billing_and_sales_management/domain/clients/entities/client.dart';
 import 'package:billing_and_sales_management/features/clients/providers/clients_notifier.dart';
+import 'package:billing_and_sales_management/features/clients/screens/client_details_screen.dart';
 import 'package:billing_and_sales_management/features/clients/widgets/client_form_sheet.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -42,6 +43,14 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
       context: context,
       title: AppTranslate.editClient.tr(),
       builder: (_) => ClientFormSheet(existing: client),
+    );
+  }
+
+  void _openClientDetails(Client client) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ClientDetailsScreen(client: client),
+      ),
     );
   }
 
@@ -163,6 +172,7 @@ class _ClientsScreenState extends ConsumerState<ClientsScreen> {
                       clients: _filter(clients),
                       isSearching: _query.trim().isNotEmpty,
                       onAddClient: _openAddClientSheet,
+                      onOpenClient: _openClientDetails,
                       onEditClient: _openEditClientSheet,
                       onDeleteClient: _confirmDeleteClient,
                     ),
@@ -184,6 +194,7 @@ class _ClientsList extends StatelessWidget {
     required this.clients,
     required this.isSearching,
     required this.onAddClient,
+    required this.onOpenClient,
     required this.onEditClient,
     required this.onDeleteClient,
   });
@@ -191,6 +202,7 @@ class _ClientsList extends StatelessWidget {
   final List<Client> clients;
   final bool isSearching;
   final VoidCallback onAddClient;
+  final ValueChanged<Client> onOpenClient;
   final ValueChanged<Client> onEditClient;
   final ValueChanged<Client> onDeleteClient;
 
@@ -239,6 +251,7 @@ class _ClientsList extends StatelessWidget {
           title: client.name,
           subtitle: '${client.phone} · #${client.number}',
           showChevron: false,
+          onTap: () => onOpenClient(client),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

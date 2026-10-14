@@ -23,6 +23,32 @@ class FirebaseRequestFormRemoteDataSource
     }
   }
 
+  @override
+  Future<List<RequestFormModel>> getRequestFormsByClientId(
+    String clientId,
+  ) async {
+    try {
+      final snapshot = await _requestForms
+          .where('clientId', isEqualTo: clientId)
+          .get();
+
+      final requestForms = snapshot.docs
+          .map(RequestFormModel.fromFirestore)
+          .where((requestForm) => requestForm.clientId.isNotEmpty)
+          .toList();
+
+      requestForms.sort((a, b) {
+        final byDate = b.date.compareTo(a.date);
+        if (byDate != 0) return byDate;
+        return b.startTime.compareTo(a.startTime);
+      });
+
+      return requestForms;
+    } on FirebaseException catch (error) {
+      throw RequestFormException(mapFirebaseFirestoreErrorCode(error.code));
+    }
+  }
+
   static String mapFirebaseFirestoreErrorCode(String code) {
     switch (code) {
       case 'unavailable':

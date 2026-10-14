@@ -1,4 +1,5 @@
 import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:billing_and_sales_management/domain/clients/entities/client.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -6,31 +7,33 @@ import 'package:flutter/material.dart';
 class RequestFormFields extends StatelessWidget {
   const RequestFormFields({
     super.key,
-    required this.employeeNameController,
+    required this.clients,
+    required this.selectedClient,
     required this.dateController,
     required this.startTimeController,
     required this.endTimeController,
-    required this.employeeNameError,
+    required this.clientError,
     required this.dateError,
     required this.startTimeError,
     required this.endTimeError,
     required this.enabled,
-    required this.onEmployeeNameChanged,
+    required this.onClientChanged,
     required this.onPickDate,
     required this.onPickStartTime,
     required this.onPickEndTime,
   });
 
-  final TextEditingController employeeNameController;
+  final List<Client> clients;
+  final Client? selectedClient;
   final TextEditingController dateController;
   final TextEditingController startTimeController;
   final TextEditingController endTimeController;
-  final String? employeeNameError;
+  final String? clientError;
   final String? dateError;
   final String? startTimeError;
   final String? endTimeError;
   final bool enabled;
-  final ValueChanged<String> onEmployeeNameChanged;
+  final ValueChanged<Client?> onClientChanged;
   final VoidCallback onPickDate;
   final VoidCallback onPickStartTime;
   final VoidCallback onPickEndTime;
@@ -41,16 +44,29 @@ class RequestFormFields extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        CustomTextField(
-          controller: employeeNameController,
-          label: AppTranslate.employeeName.tr(),
+        CustomDropdown<Client>(
+          label: AppTranslate.clientName.tr(),
           isRequired: true,
-          hint: AppTranslate.enterEmployeeName.tr(),
-          errorText: employeeNameError,
+          hint: AppTranslate.selectClient.tr(),
+          options: clients,
+          value: selectedClient,
+          labelOf: (client) => client.name,
           enabled: enabled,
-          textInputAction: TextInputAction.next,
-          onChanged: onEmployeeNameChanged,
+          onChanged: onClientChanged,
         ),
+        if (clientError != null) ...[
+          SizedBox(height: AppSpacing.xs.h),
+          Padding(
+            padding: EdgeInsetsDirectional.only(
+              start: AppDimensions.inputHorizontalPadding.w,
+            ),
+            child: CustomText(
+              text: clientError!,
+              style: AppTextStyles.fieldError,
+              color: AppColors.error,
+            ),
+          ),
+        ],
         SizedBox(height: AppSpacing.formGroupGap.h),
         CustomTextField(
           controller: dateController,

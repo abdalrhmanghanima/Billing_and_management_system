@@ -2,4 +2,6 @@ import 'package:billing_and_sales_management/domain/request_forms/entities/reque
 
 abstract interface class RequestFormRepository {
   Future<void> addRequestForm(RequestForm requestForm);
+
+  Future<List<RequestForm>> getRequestFormsByClientId(String clientId);
 }

@@ -244,6 +244,47 @@ class AppTranslate {
   static const String phoneInvalid = 'phone_invalid';
   static const String addressRequired = 'address_required';
   static const String clientNotFound = 'client_not_found';
+  static const String clientDetails = 'client_details';
+  static const String clientNumber = 'client_number';
+  static const String phone = 'phone';
+  static const String invoiceHistory = 'invoice_history';
+  static const String requestFormsHistory = 'request_forms_history';
+  static const String selectMonthAndYear = 'select_month_and_year';
+  static const String previousMonth = 'previous_month';
+  static const String nextMonth = 'next_month';
+  static const String month = 'month';
+  static const String year = 'year';
+  static const String apply = 'apply';
+  static const String print = 'print';
+  static const String couldNotPrintInvoiceHistory =
+      'could_not_print_invoice_history';
+  static const String noInvoicesForPeriod = 'no_invoices_for_period';
+  static const String noInvoicesForClientInPeriodMessage =
+      'no_invoices_for_client_in_period_message';
+  static const String noRequestsYet = 'no_requests_yet';
+  static const String noRequestsForClientMessage =
+      'no_requests_for_client_message';
+  static const String couldNotLoadRequests = 'could_not_load_requests';
+  static const String totals = 'totals';
+  static const String status = 'status';
+  static const String invoiceNumberHeader = 'invoice_number_header';
+  static const String addClientFirstBeforeRequestsMessage =
+      'add_client_first_before_requests_message';
+
+  static const List<String> monthNames = <String>[
+    'month_january',
+    'month_february',
+    'month_march',
+    'month_april',
+    'month_may',
+    'month_june',
+    'month_july',
+    'month_august',
+    'month_september',
+    'month_october',
+    'month_november',
+    'month_december',
+  ];
 
   // Items
   static const String itemsSubtitle = 'items_subtitle';
@@ -409,12 +450,9 @@ class AppTranslate {
   static const String requestSubmittedSuccessfully =
       'request_submitted_successfully';
   static const String couldNotSubmitRequest = 'could_not_submit_request';
-  static const String employeeName = 'employee_name';
-  static const String enterEmployeeName = 'enter_employee_name';
   static const String date = 'date';
   static const String startTime = 'start_time';
   static const String endTime = 'end_time';
-  static const String employeeNameRequired = 'employee_name_required';
   static const String dateRequired = 'date_required';
   static const String startTimeRequired = 'start_time_required';
   static const String endTimeRequired = 'end_time_required';

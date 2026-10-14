@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 class RequestFormExceptionCodes {
   const RequestFormExceptionCodes._();
 
-  static const String employeeNameRequired = 'employee-name-required';
+  static const String clientRequired = 'client-required';
   static const String dateRequired = 'date-required';
   static const String startTimeRequired = 'start-time-required';
   static const String endTimeRequired = 'end-time-required';
@@ -23,8 +23,8 @@ class RequestFormException implements Exception {
 
   String get message {
     switch (code) {
-      case RequestFormExceptionCodes.employeeNameRequired:
-        return AppTranslate.employeeNameRequired.tr();
+      case RequestFormExceptionCodes.clientRequired:
+        return AppTranslate.clientNameRequired.tr();
       case RequestFormExceptionCodes.dateRequired:
         return AppTranslate.dateRequired.tr();
       case RequestFormExceptionCodes.startTimeRequired:

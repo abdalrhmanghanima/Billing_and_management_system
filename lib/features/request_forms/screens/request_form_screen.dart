@@ -1,5 +1,8 @@
 import 'package:billing_and_sales_management/core/enums/save_result.dart';
+import 'package:billing_and_sales_management/core/errors/client_exception.dart';
 import 'package:billing_and_sales_management/core/translate/app_translate.dart';
+import 'package:billing_and_sales_management/domain/clients/entities/client.dart';
+import 'package:billing_and_sales_management/features/clients/providers/clients_notifier.dart';
 import 'package:billing_and_sales_management/features/request_forms/providers/request_forms_notifier.dart';
 import 'package:billing_and_sales_management/features/request_forms/widgets/request_form_fields.dart';
 import 'package:billing_and_sales_management/responsive/responsive.dart';
@@ -15,7 +18,6 @@ class RequestFormScreen extends ConsumerStatefulWidget {
 }
 
 class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
-  final TextEditingController _employeeNameController = TextEditingController();
   late final TextEditingController _dateController;
   late final TextEditingController _startTimeController;
   late final TextEditingController _endTimeController;
@@ -24,7 +26,8 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 17, minute: 0);
 
-  String? _employeeNameError;
+  Client? _selectedClient;
+  String? _clientError;
   String? _dateError;
   String? _startTimeError;
   String? _endTimeError;
@@ -41,7 +44,6 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
 
   @override
   void dispose() {
-    _employeeNameController.dispose();
     _dateController.dispose();
     _startTimeController.dispose();
     _endTimeController.dispose();
@@ -121,8 +123,8 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
   Future<void> _submit() async {
     if (_isSaving) return;
 
-    final employeeName = _employeeNameController.text.trim();
-    final nameInvalid = employeeName.isEmpty;
+    final client = _selectedClient;
+    final clientInvalid = client == null;
     final dateInvalid = _dateController.text.trim().isEmpty;
     final startTimeInvalid = _startTimeController.text.trim().isEmpty;
     final endTimeInvalid = _endTimeController.text.trim().isEmpty;
@@ -132,8 +134,8 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
         _minutesOf(_endTime) <= _minutesOf(_startTime);
 
     setState(() {
-      _employeeNameError = nameInvalid
-          ? AppTranslate.employeeNameRequired.tr()
+      _clientError = clientInvalid
+          ? AppTranslate.clientNameRequired.tr()
           : null;
       _dateError = dateInvalid ? AppTranslate.dateRequired.tr() : null;
       _startTimeError = startTimeInvalid
@@ -146,7 +148,7 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
           : null;
     });
 
-    if (nameInvalid ||
+    if (clientInvalid ||
         dateInvalid ||
         startTimeInvalid ||
         endTimeInvalid ||
@@ -159,7 +161,8 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
     final result = await ref
         .read(requestFormsProvider)
         .addRequestForm(
-          employeeName: employeeName,
+          clientId: client.id,
+          clientName: client.name,
           date: _dateController.text.trim(),
           startTime: _to24HourTime(_startTime),
           endTime: _to24HourTime(_endTime),
@@ -185,56 +188,88 @@ class _RequestFormScreenState extends ConsumerState<RequestFormScreen> {
     }
   }
 
+  Widget _buildForm(List<Client> clients) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.pageHorizontal.w,
+              vertical: AppSpacing.pageTop.h,
+            ),
+            child: RequestFormFields(
+              clients: clients,
+              selectedClient: _selectedClient,
+              dateController: _dateController,
+              startTimeController: _startTimeController,
+              endTimeController: _endTimeController,
+              clientError: _clientError,
+              dateError: _dateError,
+              startTimeError: _startTimeError,
+              endTimeError: _endTimeError,
+              enabled: !_isSaving,
+              onClientChanged: (client) {
+                setState(() {
+                  _selectedClient = client;
+                  if (_clientError != null) _clientError = null;
+                });
+              },
+              onPickDate: _pickDate,
+              onPickStartTime: _pickStartTime,
+              onPickEndTime: _pickEndTime,
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.pageHorizontal.w,
+          ),
+          child: CustomButton(
+            text: AppTranslate.submitRequest.tr(),
+            onPressed: _isSaving ? null : _submit,
+            loading: _isSaving,
+          ),
+        ),
+        SizedBox(height: AppSpacing.pageBottom.h),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final clientsState = ref.watch(clientsProvider);
+
     return Scaffold(
       appBar: CustomAppBar(title: AppTranslate.requestAForm.tr()),
       body: SafeArea(
         top: false,
         child: MaxWidthBox(
           maxWidth: AppDimensions.maxContentWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.pageHorizontal.w,
-                    vertical: AppSpacing.pageTop.h,
-                  ),
-                  child: RequestFormFields(
-                    employeeNameController: _employeeNameController,
-                    dateController: _dateController,
-                    startTimeController: _startTimeController,
-                    endTimeController: _endTimeController,
-                    employeeNameError: _employeeNameError,
-                    dateError: _dateError,
-                    startTimeError: _startTimeError,
-                    endTimeError: _endTimeError,
-                    enabled: !_isSaving,
-                    onEmployeeNameChanged: (_) {
-                      if (_employeeNameError != null) {
-                        setState(() => _employeeNameError = null);
-                      }
-                    },
-                    onPickDate: _pickDate,
-                    onPickStartTime: _pickStartTime,
-                    onPickEndTime: _pickEndTime,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.pageHorizontal.w,
-                ),
-                child: CustomButton(
-                  text: AppTranslate.submitRequest.tr(),
-                  onPressed: _isSaving ? null : _submit,
-                  loading: _isSaving,
-                ),
-              ),
-              SizedBox(height: AppSpacing.pageBottom.h),
-            ],
+          child: clientsState.when(
+            loading: () =>
+                Center(child: CustomLoading(color: context.palette.accentText)),
+            error: (error, _) => CustomErrorState(
+              title: AppTranslate.couldNotLoadClients.tr(),
+              message: error is ClientException
+                  ? error.message
+                  : AppTranslate.somethingWentWrong.tr(),
+              onRetry: () => ref.read(clientsProvider.notifier).refresh(),
+            ),
+            data: (clients) {
+              if (clients.isEmpty) {
+                return CustomEmptyState(
+                  icon: Icons.people_outline,
+                  iconColor: context.palette.cyanText,
+                  iconBackgroundColor: context.palette.cyanLight,
+                  title: AppTranslate.noClientsAvailable.tr(),
+                  message: AppTranslate.addClientFirstBeforeRequestsMessage
+                      .tr(),
+                );
+              }
+
+              return _buildForm(clients);
+            },
           ),
         ),
       ),

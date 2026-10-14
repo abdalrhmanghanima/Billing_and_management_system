@@ -15,19 +15,26 @@ class AddRequestForm {
   }
 
   Future<void> call({
-    required String employeeName,
+    required String clientId,
+    required String clientName,
     required String date,
     required String startTime,
     required String endTime,
   }) {
-    final trimmedEmployeeName = employeeName.trim();
+    final trimmedClientId = clientId.trim();
+    final trimmedClientName = clientName.trim();
     final trimmedDate = date.trim();
     final trimmedStartTime = startTime.trim();
     final trimmedEndTime = endTime.trim();
 
-    if (trimmedEmployeeName.isEmpty) {
+    if (trimmedClientId.isEmpty) {
       throw const RequestFormException(
-        RequestFormExceptionCodes.employeeNameRequired,
+        RequestFormExceptionCodes.clientRequired,
+      );
+    }
+    if (trimmedClientName.isEmpty) {
+      throw const RequestFormException(
+        RequestFormExceptionCodes.clientRequired,
       );
     }
     if (trimmedDate.isEmpty) {
@@ -61,7 +68,8 @@ class AddRequestForm {
 
     return repository.addRequestForm(
       RequestForm(
-        employeeName: trimmedEmployeeName,
+        clientId: trimmedClientId,
+        clientName: trimmedClientName,
         date: trimmedDate,
         startTime: trimmedStartTime,
         endTime: trimmedEndTime,

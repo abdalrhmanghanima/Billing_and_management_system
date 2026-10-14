@@ -14,4 +14,9 @@ class RequestFormRepositoryImpl implements RequestFormRepository {
       RequestFormModel.fromEntity(requestForm),
     );
   }
+
+  @override
+  Future<List<RequestForm>> getRequestFormsByClientId(String clientId) {
+    return _remoteDataSource.getRequestFormsByClientId(clientId);
+  }
 }
